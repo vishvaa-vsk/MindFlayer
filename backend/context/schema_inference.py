@@ -122,6 +122,17 @@ DOMAIN_SCHEMAS: list[tuple[list[str], list[str] | None, list[dict]]] = [
             {"name": "channel", "field_type": "string", "required": False, "enum": ["email", "sms", "push"], "example": "email"},
         ],
     ),
+
+    # ── Inventory / Stock ──
+    (
+        ["inventory", "stock", "warehouse"],
+        ["POST", "PUT", "PATCH"],
+        [
+            {"name": "product_id", "field_type": "string", "format": "uuid", "required": True, "description": "Product identifier"},
+            {"name": "quantity", "field_type": "integer", "required": True, "example": "10", "description": "Stock quantity"},
+            {"name": "warehouse_location", "field_type": "string", "required": False, "example": "Warehouse A"},
+        ],
+    ),
 ]
 
 # State constraint patterns detected from requirements text.
@@ -159,10 +170,10 @@ def infer_schemas(endpoints: list[Endpoint], requirements_text: str = "") -> Non
         requirements_text: Original requirements for constraint extraction.
     """
     for ep in endpoints:
-        # Skip GET/DELETE — typically no request body
-        if ep.method in ("GET", "HEAD", "OPTIONS"):
+        # Skip GET/DELETE/HEAD/OPTIONS — typically no request body
+        if ep.method in ("GET", "DELETE", "HEAD", "OPTIONS"):
             # Still set response body for GETs
-            if not ep.response_body:
+            if ep.method == "GET" and not ep.response_body:
                 ep.response_body = _infer_response_fields(ep)
             continue
 
@@ -323,6 +334,11 @@ def _try_llm_refinement(endpoints: list[Endpoint], requirements_text: str) -> No
     try:
         from config import get_settings
         settings = get_settings()
+
+        # Respect ALLOW_EXTERNAL_CALLS setting
+        if not settings.allow_external_calls:
+            logger.debug("LLM refinement skipped: ALLOW_EXTERNAL_CALLS=false")
+            return
 
         # Only attempt LLM refinement if we have an API key
         if not settings.has_api_key and settings.llm_provider in ("openrouter", "azure"):
