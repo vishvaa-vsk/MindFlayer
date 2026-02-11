@@ -2,12 +2,13 @@
 import re
 from models.context import Endpoint, AuthRule, SystemContext
 from context.llm_parser import parse_prose_to_structured
+from context.schema_inference import infer_schemas
 
 
 def is_structured_format(text: str) -> bool:
     """
     Check if text is already in structured format.
-    
+
     Structured format has lines like: METHOD /path (requires auth)
     """
     lines = [l.strip() for l in text.strip().split("\n") if l.strip()]
@@ -24,20 +25,20 @@ def parse_requirements_text(text: str) -> SystemContext:
     2. Structured Format: Direct parsing with regex
        Format: METHOD /path (requires auth_type, depends on OTHER /path)
 
-    LLM Flow:
-    - Detects if input is prose (natural language)
-    - Uses OpenAI to convert prose → structured format
-    - Falls back to regex parsing
+    After parsing, runs schema inference to populate request/response bodies,
+    state constraints, and roles on each endpoint.
 
     Args:
         text: Requirements text (prose or structured)
 
     Returns:
-        SystemContext object with parsed endpoints
+        SystemContext object with enriched endpoints
 
     Raises:
         ValueError: If requirements are malformed or LLM fails
     """
+    original_text = text  # Keep for schema inference
+
     # Check if text is already structured or needs LLM parsing
     if not is_structured_format(text):
         # Use LLM to convert prose to structured format
@@ -45,9 +46,9 @@ def parse_requirements_text(text: str) -> SystemContext:
             text = parse_prose_to_structured(text)
         except ValueError as e:
             # If API key not set, try regex parsing anyway
-            if "OPENAI_API_KEY" in str(e):
+            if "API_KEY" in str(e).upper():
                 raise ValueError(
-                    f"Natural language parsing requires OpenAI API key. {str(e)}\n"
+                    f"Natural language parsing requires an API key. {str(e)}\n"
                     f"Alternatively, use structured format: METHOD /path (requires auth)"
                 )
             raise
@@ -107,6 +108,10 @@ def parse_requirements_text(text: str) -> SystemContext:
     # Build auth rules
     auth_rules = [AuthRule(scope=scope, required_for=endpoints_list)
                   for scope, endpoints_list in auth_rules_dict.items()]
+
+    # ── Schema Inference ─────────────────────────────────
+    # Enrich endpoints with request/response schemas, state constraints, and roles
+    infer_schemas(endpoints, original_text)
 
     return SystemContext(
         endpoints=endpoints,

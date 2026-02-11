@@ -73,6 +73,64 @@
     font-size: 1rem;
 }
 
+/* ── Format Selector ─────────────────────────────────── */
+.formatSelector {
+    margin-top: 16px;
+}
+
+.formatLabel {
+    display: block;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 8px;
+}
+
+.formatGrid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.formatChip {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 14px;
+    font-family: var(--font-sans);
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    background: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: 20px;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    user-select: none;
+}
+
+.formatChip:hover {
+    color: var(--text-primary);
+    border-color: var(--border-default);
+    background: var(--bg-elevated);
+}
+
+.formatChipActive {
+    color: var(--text-accent) !important;
+    border-color: var(--accent-primary) !important;
+    background: rgba(99, 102, 241, 0.08) !important;
+    box-shadow: 0 0 0 1px var(--accent-primary);
+}
+
+.formatChip:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.formatIcon {
+    font-size: 1rem;
+}
+
 /* ── Error ────────────────────────────────────────────── */
 .error {
     margin-top: 16px;

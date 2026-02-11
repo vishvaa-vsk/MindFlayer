@@ -1,22 +1,17 @@
-"""Pytest code generator for converting test plans into executable code."""
+"""Pytest code generator with domain-aware payloads and advanced test types."""
 import json
 from models.test_plan import TestPlan
 from models.context import SystemContext
-from context.llm_parser import generate_test_code_with_llm, generate_smart_payload
+from context.llm_parser import generate_test_code_with_llm
+from context.schema_inference import fields_to_payload
 
 
 def generate_pytest(test_plan: TestPlan, context: SystemContext | None = None) -> str:
     """
     Generate pytest code from a test plan.
 
-    Uses LLM (DeepSeek V3 via OpenRouter) to generate intelligent test code.
-    Falls back to template-based generation if LLM is unavailable.
-
-    For each scenario:
-      a. "positive": call endpoint with smart LLM payloads, assert 200
-      b. "no_auth": call endpoint without auth header, assert 401
-      c. "dependency_failure": call dependency first, check error handling
-      d. "invalid_input": call with id="invalid", assert 404
+    Uses LLM to generate intelligent test code when available.
+    Falls back to template-based generation with FieldSpec-driven payloads.
 
     Args:
         test_plan: TestPlan with scenarios to generate
@@ -53,6 +48,12 @@ def generate_pytest(test_plan: TestPlan, context: SystemContext | None = None) -
         '    return {"Authorization": "Bearer test-token-valid"}',
         "",
         "",
+        "@pytest.fixture",
+        "def forbidden_headers():",
+        '    """Provide headers for an unauthorized role."""',
+        '    return {"Authorization": "Bearer forbidden-role-token"}',
+        "",
+        "",
         "# ── Tests ────────────────────────────────────────────────",
         "",
     ]
@@ -85,7 +86,7 @@ def generate_pytest(test_plan: TestPlan, context: SystemContext | None = None) -
         if llm_code:
             code_lines.append(llm_code)
         else:
-            # Fallback: template-based generation
+            # Fallback: template-based generation with FieldSpec payloads
             code_lines.append(_generate_template_test(
                 test_name=test_name,
                 method=method,
@@ -93,6 +94,8 @@ def generate_pytest(test_plan: TestPlan, context: SystemContext | None = None) -
                 test_type=test_type,
                 description=description,
                 requires_auth=requires_auth,
+                endpoint=ep,
+                scenario=scenario,
             ))
 
         code_lines.append("")
@@ -111,51 +114,159 @@ def generate_pytest(test_plan: TestPlan, context: SystemContext | None = None) -
 
 def _generate_template_test(test_name: str, method: str, path: str,
                              test_type: str, description: str,
-                             requires_auth: bool = False) -> str:
-    """Generate template-based test when LLM is unavailable."""
+                             requires_auth: bool = False,
+                             endpoint=None, scenario=None) -> str:
+    """Generate template-based test with FieldSpec-driven payloads."""
     test_path = path.replace(":id", "test-id-123")
+    expected_status = scenario.expected_status if scenario else 200
     lines = []
 
-    lines.append(f"def test_{test_name}(client):")
+    # Determine fixtures needed
+    fixtures = ["client"]
+    if requires_auth and test_type not in ("no_auth",):
+        fixtures.append("auth_headers")
+    if test_type == "forbidden_role":
+        fixtures.append("forbidden_headers")
+
+    fixture_str = ", ".join(fixtures)
+    lines.append(f"def test_{test_name}({fixture_str}):")
     lines.append(f'    """{description}"""')
 
     if test_type == "positive":
         if method in ("POST", "PUT", "PATCH"):
-            payload = generate_smart_payload(path, method)
+            payload = _get_payload(endpoint, scenario)
             payload_str = json.dumps(payload, indent=8)
-            lines.extend([
-                f"    payload = {payload_str}",
-                f"    response = client.{method.lower()}('{test_path}', json=payload)",
-                f"    assert response.status_code in [200, 201]",
-                f"    assert response.json() is not None",
-            ])
+            lines.append(f"    payload = {payload_str}")
+            if requires_auth:
+                lines.append(f"    response = client.{method.lower()}('{test_path}', json=payload, headers=auth_headers)")
+            else:
+                lines.append(f"    response = client.{method.lower()}('{test_path}', json=payload)")
+            lines.append(f"    assert response.status_code in [200, 201]")
+            lines.append(f"    data = response.json()")
+            lines.append(f"    assert data is not None")
+            # Verify key fields are returned
+            if endpoint and endpoint.request_body:
+                key_field = endpoint.request_body[0]
+                lines.append(f'    assert "{key_field.name}" in data or "id" in data')
         else:
-            lines.extend([
-                f"    response = client.{method.lower()}('{test_path}')",
-                f"    assert response.status_code == 200",
-                f"    assert response.json() is not None",
-            ])
+            if requires_auth:
+                lines.append(f"    response = client.{method.lower()}('{test_path}', headers=auth_headers)")
+            else:
+                lines.append(f"    response = client.{method.lower()}('{test_path}')")
+            lines.append(f"    assert response.status_code == {expected_status}")
+            lines.append(f"    assert response.json() is not None")
 
     elif test_type == "no_auth":
-        lines.extend([
-            f"    # No-auth test: expect 401/403",
-            f"    response = client.{method.lower()}('{test_path}', headers={{}})",
-            f"    assert response.status_code in [401, 403]",
-        ])
+        if method in ("POST", "PUT", "PATCH"):
+            payload = _get_payload(endpoint, scenario)
+            payload_str = json.dumps(payload, indent=8)
+            lines.append(f"    payload = {payload_str}")
+            lines.append(f"    response = client.{method.lower()}('{test_path}', json=payload, headers={{}})")
+        else:
+            lines.append(f"    response = client.{method.lower()}('{test_path}', headers={{}})")
+        lines.append(f"    assert response.status_code in [401, 403]")
 
     elif test_type == "dependency_failure":
-        lines.extend([
-            f"    # Dependency failure: skip required setup, verify error handling",
-            f"    response = client.{method.lower()}('{test_path}')",
-            f"    assert response.status_code in [400, 404, 409, 422, 424]",
-        ])
+        lines.append(f"    # Dependency failure: skip required setup, verify error handling")
+        if requires_auth:
+            lines.append(f"    response = client.{method.lower()}('{test_path}', headers=auth_headers)")
+        else:
+            lines.append(f"    response = client.{method.lower()}('{test_path}')")
+        lines.append(f"    assert response.status_code in [400, 404, 409, 422, 424]")
 
     elif test_type == "invalid_input":
         invalid_path = path.replace(":id", "nonexistent-id-999")
-        lines.extend([
-            f"    # Invalid input: non-existent resource",
-            f"    response = client.{method.lower()}('{invalid_path}')",
-            f"    assert response.status_code == 404",
-        ])
+        lines.append(f"    # Invalid input: non-existent resource")
+        if requires_auth:
+            lines.append(f"    response = client.{method.lower()}('{invalid_path}', headers=auth_headers)")
+        else:
+            lines.append(f"    response = client.{method.lower()}('{invalid_path}')")
+        lines.append(f"    assert response.status_code == 404")
+
+    elif test_type == "state_conflict":
+        hint = scenario.payload_hint if scenario else {}
+        state_field = next(iter(hint), "status") if hint else "status"
+        state_value = hint.get(state_field, "completed") if hint else "completed"
+        lines.append(f"    # State conflict: attempting operation when {state_field}='{state_value}'")
+        lines.append(f"    # This should fail because the resource is in an invalid state")
+        if method in ("POST", "PUT", "PATCH"):
+            payload = _get_payload(endpoint, scenario)
+            payload[state_field] = state_value
+            payload_str = json.dumps(payload, indent=8)
+            lines.append(f"    payload = {payload_str}")
+            if requires_auth:
+                lines.append(f"    response = client.{method.lower()}('{test_path}', json=payload, headers=auth_headers)")
+            else:
+                lines.append(f"    response = client.{method.lower()}('{test_path}', json=payload)")
+        else:
+            if requires_auth:
+                lines.append(f"    response = client.{method.lower()}('{test_path}', headers=auth_headers)")
+            else:
+                lines.append(f"    response = client.{method.lower()}('{test_path}')")
+        lines.append(f"    assert response.status_code == {expected_status}")
+
+    elif test_type == "forbidden_role":
+        lines.append(f"    # Forbidden role: user lacks required permissions")
+        if method in ("POST", "PUT", "PATCH"):
+            payload = _get_payload(endpoint, scenario)
+            payload_str = json.dumps(payload, indent=8)
+            lines.append(f"    payload = {payload_str}")
+            lines.append(f"    response = client.{method.lower()}('{test_path}', json=payload, headers=forbidden_headers)")
+        else:
+            lines.append(f"    response = client.{method.lower()}('{test_path}', headers=forbidden_headers)")
+        lines.append(f"    assert response.status_code == 403")
+
+    elif test_type == "field_validation":
+        hint = scenario.payload_hint if scenario else {}
+        omit_field = hint.get("_omit_field") if hint else None
+        if omit_field:
+            lines.append(f"    # Missing required field: {omit_field}")
+            payload = _get_payload(endpoint, scenario)
+            payload.pop(omit_field, None)
+            payload.pop("_omit_field", None)
+        else:
+            lines.append(f"    # Invalid field format")
+            payload = _get_payload(endpoint, scenario)
+        payload_str = json.dumps(payload, indent=8)
+        lines.append(f"    payload = {payload_str}")
+        if requires_auth:
+            lines.append(f"    response = client.{method.lower()}('{test_path}', json=payload, headers=auth_headers)")
+        else:
+            lines.append(f"    response = client.{method.lower()}('{test_path}', json=payload)")
+        lines.append(f"    assert response.status_code == 422")
+
+    elif test_type == "boundary_value":
+        hint = scenario.payload_hint if scenario else {}
+        field_name = next(iter(hint), "field") if hint else "field"
+        field_value = hint.get(field_name, "x") if hint else "x"
+        lines.append(f"    # Boundary value: {field_name} is too short")
+        payload = _get_payload(endpoint, scenario)
+        payload[field_name] = field_value
+        payload_str = json.dumps(payload, indent=8)
+        lines.append(f"    payload = {payload_str}")
+        if requires_auth:
+            lines.append(f"    response = client.{method.lower()}('{test_path}', json=payload, headers=auth_headers)")
+        else:
+            lines.append(f"    response = client.{method.lower()}('{test_path}', json=payload)")
+        lines.append(f"    assert response.status_code == 422")
 
     return "\n".join(lines)
+
+
+def _get_payload(endpoint, scenario) -> dict:
+    """Get a realistic payload from FieldSpec or scenario hint."""
+    if scenario and scenario.payload_hint:
+        # If we have endpoint fields, start with those and overlay hint
+        if endpoint and endpoint.request_body:
+            payload = fields_to_payload(endpoint.request_body)
+            for k, v in scenario.payload_hint.items():
+                if k != "_omit_field":
+                    payload[k] = v
+            return payload
+        return dict(scenario.payload_hint)
+
+    if endpoint and endpoint.request_body:
+        return fields_to_payload(endpoint.request_body)
+
+    # Absolute fallback
+    return {"name": "Test Item", "description": "Test description"}

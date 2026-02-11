@@ -1,22 +1,11 @@
-"""LLM-based natural language requirements parser using OpenRouter."""
+"""LLM-based natural language requirements parser using the adapter layer."""
 import json
-from openai import OpenAI
+import logging
 
 from config import get_settings
+from adapters.registry import get_adapter
 
-
-def _get_client() -> OpenAI:
-    """Get OpenAI-compatible client pointing to OpenRouter."""
-    settings = get_settings()
-    if not settings.has_api_key:
-        raise ValueError(
-            "OPENROUTER_API_KEY not set. "
-            "Set it in .env or via the settings panel."
-        )
-    return OpenAI(
-        base_url=settings.openrouter_base_url,
-        api_key=settings.openrouter_api_key,
-    )
+logger = logging.getLogger(__name__)
 
 
 def parse_prose_to_structured(prose: str) -> str:
@@ -37,7 +26,7 @@ def parse_prose_to_structured(prose: str) -> str:
         Structured requirements string (METHOD /path format)
     """
     settings = get_settings()
-    client = _get_client()
+    adapter = get_adapter()
 
     prompt = f"""You are an API design expert. Convert the following natural language requirements into structured API endpoints.
 
@@ -61,17 +50,17 @@ Requirements:
 
 Structured endpoints:"""
 
-    response = client.chat.completions.create(
+    messages = [
+        {"role": "system", "content": "You are an API design expert. Convert natural language requirements to structured REST API endpoints."},
+        {"role": "user", "content": prompt},
+    ]
+
+    return adapter.chat(
+        messages=messages,
         model=settings.parsing_model,
-        messages=[
-            {"role": "system", "content": "You are an API design expert. Convert natural language requirements to structured REST API endpoints."},
-            {"role": "user", "content": prompt}
-        ],
         temperature=settings.parsing_temperature,
         max_tokens=1000,
     )
-
-    return response.choices[0].message.content.strip()
 
 
 def generate_smart_payload(endpoint_path: str, endpoint_method: str, description: str = "") -> dict:
@@ -87,10 +76,14 @@ def generate_smart_payload(endpoint_path: str, endpoint_method: str, description
         Dictionary with realistic test data
     """
     settings = get_settings()
-    if not settings.has_api_key:
+
+    try:
+        adapter = get_adapter()
+    except Exception:
         return get_generic_payload(endpoint_path, endpoint_method)
 
-    client = _get_client()
+    if not settings.has_api_key and settings.llm_provider in ("openrouter", "azure"):
+        return get_generic_payload(endpoint_path, endpoint_method)
 
     prompt = f"""Generate a realistic JSON payload for testing this API endpoint:
 
@@ -112,25 +105,26 @@ Examples:
 
 Generate payload:"""
 
+    messages = [
+        {"role": "system", "content": "You are a test data generation expert. Generate realistic JSON payloads for API testing."},
+        {"role": "user", "content": prompt},
+    ]
+
     try:
-        response = client.chat.completions.create(
+        result = adapter.chat(
+            messages=messages,
             model=settings.parsing_model,
-            messages=[
-                {"role": "system", "content": "You are a test data generation expert. Generate realistic JSON payloads for API testing."},
-                {"role": "user", "content": prompt}
-            ],
             temperature=0.5,
             max_tokens=500,
         )
 
-        payload_str = response.choices[0].message.content.strip()
         # Strip markdown code fences if present
-        if payload_str.startswith("```"):
-            lines = payload_str.split("\n")
-            payload_str = "\n".join(lines[1:-1] if lines[-1].strip() == "```" else lines[1:])
+        if result.startswith("```"):
+            lines = result.split("\n")
+            result = "\n".join(lines[1:-1] if lines[-1].strip() == "```" else lines[1:])
 
         try:
-            return json.loads(payload_str)
+            return json.loads(result)
         except json.JSONDecodeError:
             return get_generic_payload(endpoint_path, endpoint_method)
     except Exception:
@@ -157,10 +151,14 @@ def generate_test_code_with_llm(test_name: str, endpoint_name: str, endpoint_met
         String containing the complete pytest test function code
     """
     settings = get_settings()
-    if not settings.has_api_key:
+
+    try:
+        adapter = get_adapter()
+    except Exception:
         return ""  # Fallback to template-based generation
 
-    client = _get_client()
+    if not settings.has_api_key and settings.llm_provider in ("openrouter", "azure"):
+        return ""
 
     # Build the test path for client calls
     test_path = endpoint_path.replace(":id", "test-id-123")
@@ -190,18 +188,19 @@ Rules:
 
 Write the pytest function:"""
 
+    messages = [
+        {"role": "system", "content": "You are a senior test engineer. Write clean pytest test functions for REST API testing. Return ONLY code, no markdown fences or explanations."},
+        {"role": "user", "content": prompt},
+    ]
+
     try:
-        response = client.chat.completions.create(
+        code = adapter.chat(
+            messages=messages,
             model=settings.generation_model,
-            messages=[
-                {"role": "system", "content": "You are a senior test engineer. Write clean pytest test functions for REST API testing. Return ONLY code, no markdown fences or explanations."},
-                {"role": "user", "content": prompt}
-            ],
             temperature=settings.generation_temperature,
             max_tokens=600,
         )
 
-        code = response.choices[0].message.content.strip()
         # Strip markdown code fences if present
         if code.startswith("```"):
             lines = code.split("\n")
@@ -213,21 +212,28 @@ Write the pytest function:"""
 
 def get_generic_payload(endpoint_path: str, endpoint_method: str) -> dict:
     """
-    Generate generic payload when LLM is unavailable.
+    Generate domain-aware payload when LLM is unavailable.
+
+    Uses schema inference to produce realistic field names (email, password, etc.)
+    instead of generic templates like {resource}_name.
 
     Args:
         endpoint_path: API path
         endpoint_method: HTTP method
 
     Returns:
-        Generic payload dictionary
+        Realistic payload dictionary
     """
     if endpoint_method in ["POST", "PUT", "PATCH"]:
-        resource = endpoint_path.strip("/").split("/")[0]
-        return {
-            "id": "test-id-123",
-            f"{resource[:-1] if resource.endswith('s') else resource}_name": "Test Item",
-            "created_at": "2025-01-01T00:00:00Z",
-            "status": "active",
-        }
+        from models.context import Endpoint
+        from context.schema_inference import infer_schemas, fields_to_payload
+
+        # Create a temporary endpoint for inference
+        ep = Endpoint(name="temp", method=endpoint_method, url_path=endpoint_path)
+        infer_schemas([ep])
+        if ep.request_body:
+            return fields_to_payload(ep.request_body)
+
+        # Absolute fallback (should rarely reach here)
+        return {"name": "Test Item", "description": "Test description"}
     return {}

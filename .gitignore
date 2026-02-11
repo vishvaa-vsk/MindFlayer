@@ -1,0 +1,34 @@
+# ── Environment & Secrets ─────────────────────────────
+.env
+.env.local
+.env.production
+!.env.example
+
+# ── Python ────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+.venv/
+*.egg
+
+# ── Node / Next.js ────────────────────────────────────
+node_modules/
+.next/
+out/
+.vercel
+
+# ── IDE ───────────────────────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# ── OS ────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+
+# ── Misc ──────────────────────────────────────────────
+*.log

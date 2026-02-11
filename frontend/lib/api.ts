@@ -54,6 +54,7 @@ export interface GenerateTestsResult {
     context: SystemContext;
     test_plan: TestPlan;
     generated_code: string;
+    outputs: Record<string, string>;
     validation: ValidationReport;
     parsed_with_llm: boolean;
 }
@@ -62,8 +63,32 @@ export interface AppSettings {
     has_api_key: boolean;
     parsing_model: string;
     generation_model: string;
+    llm_provider: string;
+    allow_external_calls: boolean;
     app_name: string;
     app_version: string;
+}
+
+export interface OutputFormat {
+    name: string;
+    description: string;
+    icon: string;
+    language: string;
+    extension: string;
+}
+
+export interface ProviderInfo {
+    name: string;
+    is_local: boolean;
+    available: boolean;
+    blocked_by_privacy: boolean;
+    models: string[];
+}
+
+export interface ProvidersResponse {
+    current_provider: string;
+    allow_external_calls: boolean;
+    providers: ProviderInfo[];
 }
 
 export interface StreamEvent {
@@ -85,6 +110,7 @@ export type PipelineStage = 'idle' | 'parsing' | 'planning' | 'generating' | 'va
 export async function generateTests(
     requirementsText: string,
     existingTestNames: string[] = [],
+    outputFormats: string[] = ['pytest'],
 ): Promise<GenerateTestsResult> {
     const res = await fetch(`${API_BASE}/generate-tests`, {
         method: 'POST',
@@ -92,6 +118,7 @@ export async function generateTests(
         body: JSON.stringify({
             requirements_text: requirementsText,
             existing_test_names: existingTestNames,
+            output_formats: outputFormats,
         }),
     });
 
@@ -107,6 +134,7 @@ export async function generateTestsStream(
     requirementsText: string,
     existingTestNames: string[] = [],
     onEvent: (event: StreamEvent) => void,
+    outputFormats: string[] = ['pytest'],
 ): Promise<void> {
     const res = await fetch(`${API_BASE}/generate-tests-stream`, {
         method: 'POST',
@@ -114,6 +142,7 @@ export async function generateTestsStream(
         body: JSON.stringify({
             requirements_text: requirementsText,
             existing_test_names: existingTestNames,
+            output_formats: outputFormats,
         }),
     });
 
@@ -159,8 +188,18 @@ export async function getSettings(): Promise<AppSettings> {
 
 export async function updateSettings(settings: {
     openrouter_api_key?: string;
+    azure_api_key?: string;
+    azure_endpoint?: string;
+    azure_api_version?: string;
+    azure_deployment_parsing?: string;
+    azure_deployment_generation?: string;
     parsing_model?: string;
     generation_model?: string;
+    llm_provider?: string;
+    allow_external_calls?: boolean;
+    ollama_base_url?: string;
+    vllm_base_url?: string;
+    tgi_base_url?: string;
 }): Promise<AppSettings> {
     const res = await fetch(`${API_BASE}/settings`, {
         method: 'POST',
@@ -177,5 +216,18 @@ export async function updateSettings(settings: {
 export async function healthCheck(): Promise<Record<string, unknown>> {
     const res = await fetch(`${API_BASE}/health`);
     if (!res.ok) throw new Error('Backend unreachable');
+    return res.json();
+}
+
+export async function getFormats(): Promise<Record<string, OutputFormat>> {
+    const res = await fetch(`${API_BASE}/formats`);
+    if (!res.ok) throw new Error('Failed to fetch formats');
+    const data = await res.json();
+    return data.formats;
+}
+
+export async function getProviders(): Promise<ProvidersResponse> {
+    const res = await fetch(`${API_BASE}/providers`);
+    if (!res.ok) throw new Error('Failed to fetch providers');
     return res.json();
 }

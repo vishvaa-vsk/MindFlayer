@@ -1,7 +1,7 @@
 [project]
 name = "mindflayer"
-version = "1.0.0"
-description = "MindFlayer — AI-powered test intelligence engine"
+version = "2.0.0"
+description = "MindFlayer — Enterprise AI-powered test intelligence engine"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
@@ -11,5 +11,6 @@ dependencies = [
     "pydantic>=2.12.5",
     "pydantic-settings>=2.5.0",
     "pytest>=9.0.2",
+    "pyyaml>=6.0",
     "uvicorn[standard]>=0.30.0",
 ]
