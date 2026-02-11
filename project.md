@@ -1,250 +1,234 @@
-🚀 TestCortex MVP plan
-🎯 One‑sentence goal (keep this visible)
-Build a context‑aware test intelligence engine that plans missing API tests from requirements and existing tests, then generates executable test code.
+# MindFlayer
+
+AI-powered test generation engine that converts API requirements into complete, executable pytest suites — with intelligent planning, coverage analysis, and real-time streaming.
+
+---
+
+## Quick Start
+
+```bash
+# Terminal 1 — Backend
+cd backend
+uv sync
+uv run python -m uvicorn main:app --host 0.0.0.0 --port 8000
+
+# Terminal 2 — Frontend
+cd frontend
+npm install
+npm run dev
+```
+
+Open **http://localhost:3000**
+
+> Set your OpenRouter API key at **Settings** page or via `OPENROUTER_API_KEY` env var for LLM-powered generation. Without it, the template fallback still produces working tests.
+
+---
+
+## What It Does
+
+```
+API Requirements (structured or natural language)
+    ↓
+[1] Parse      → Extract endpoints, auth rules, dependencies
+    ↓
+[2] Plan       → Generate test scenarios (positive, auth, dependency, invalid input)
+    ↓
+[3] Generate   → Write executable pytest code (LLM-first, template fallback)
+    ↓
+[4] Validate   → Deduplicate, calculate coverage, report gaps
+    ↓
+Complete test suite + coverage report
+```
+
+### Input Formats
+
+**Structured:**
+```
+POST /orders (requires user_auth)
+GET /orders/:id (requires user_auth, depends on POST /orders)
+DELETE /orders/:id (requires admin_auth)
+```
+
+**Natural Language:**
+```
+Users can register, login, and create orders.
+Authenticated users can view order history and cancel pending orders.
+Admin users can manage products and view all orders.
+```
+
+---
+
+## Architecture
+
+```
+MindFlayer/
+├── backend/                    # FastAPI + Python
+│   ├── api/
+│   │   └── routes.py           # REST + SSE streaming endpoints
+│   ├── context/
+│   │   ├── builder.py          # Requirements parser (regex + LLM detection)
+│   │   └── llm_parser.py       # OpenRouter LLM client (parse + generate)
+│   ├── planner/
+│   │   └── test_planner.py     # Intelligent test scenario planning
+│   ├── generator/
+│   │   └── pytest_gen.py       # Code generation (LLM-first + template fallback)
+│   ├── validator/
+│   │   └── coverage.py         # Deduplication + coverage metrics
+│   ├── models/
+│   │   ├── context.py          # Endpoint, AuthRule, SystemContext
+│   │   ├── test_plan.py        # TestScenario, TestPlan
+│   │   └── generated_test.py   # GeneratedTest, TestSuite
+│   ├── config.py               # Centralized settings (pydantic-settings)
+│   ├── main.py                 # FastAPI app + lifespan + CORS
+│   └── pyproject.toml          # Dependencies (uv)
+│
+└── frontend/                   # Next.js 16 + TypeScript
+    ├── app/
+    │   ├── page.tsx             # Landing page (hero, pipeline, features)
+    │   ├── generate/page.tsx    # Main generation page (SSE + tabbed results)
+    │   └── settings/page.tsx    # API key + model configuration
+    ├── components/
+    │   ├── Navbar.tsx           # Scroll-aware glassmorphism navbar
+    │   ├── PipelineVisualizer.tsx  # 4-stage animated progress
+    │   ├── TestOutput.tsx       # Code viewer with syntax highlighting
+    │   └── CoverageReport.tsx   # Stats cards + progress bar + test lists
+    └── lib/
+        └── api.ts              # TypeScript API client + SSE parser
+```
+
+---
+
+## Tech Stack
 
-Everything you do must serve this sentence.
+| Layer | Technology | Purpose |
+|-------|-----------|---------|
+| Frontend | Next.js 16 (App Router) | SSR, routing, TypeScript |
+| Styling | Custom CSS | Dark theme, glassmorphism, animations |
+| Backend | FastAPI | Async API, SSE streaming, auto-docs |
+| Validation | Pydantic v2 | Schema enforcement |
+| Config | pydantic-settings | Env vars, runtime updates |
+| LLM | OpenRouter | Access to Gemini, DeepSeek, Llama, etc. |
+| Package Mgr | uv (backend), npm (frontend) | Fast, reproducible |
 
-🧠 CORE PRINCIPLE (important)
-Never ask Copilot to “design” the system.
-You design → Copilot implements.
+---
 
-Copilot is best at:
+## API Endpoints
 
-Filling boilerplate
+### `POST /api/generate-tests`
+Standard (non-streaming) test generation.
 
-Implementing functions from clear intent
+```bash
+curl -X POST http://localhost:8000/api/generate-tests \
+  -H "Content-Type: application/json" \
+  -d '{
+    "requirements_text": "POST /orders (requires user_auth)\nGET /orders/:id (requires user_auth, depends on POST /orders)",
+    "existing_test_names": []
+  }'
+```
 
-Writing schemas, parsers, templates
+### `POST /api/generate-tests-stream`
+Real-time SSE streaming with stage-by-stage progress updates.
 
-Copilot is bad at:
+### `GET /api/health`
+Returns app status, configured models, feature list.
 
-System boundaries
+### `GET /api/settings` | `POST /api/settings`
+Read and update runtime config (API key, models).
 
-Architecture
+### `GET /docs`
+Interactive Swagger UI.
 
-Deciding what matters
+---
 
-🧩 SYSTEM BREAKDOWN (what you code)
-You will build 5 clear modules.
-Each module = a Copilot task.
+## LLM Configuration
 
-/backend
- ├─ api/              # FastAPI routes
- ├─ context/          # context builder + store
- ├─ planner/          # decides what tests should exist
- ├─ generator/        # writes test code
- ├─ validator/        # coverage & dedup
- └─ models/           # Pydantic schemas
-🟢 STEP 1 — Lock schemas FIRST (MOST IMPORTANT)
-Before any logic, create schemas.
-This gives Copilot rails.
+| Model | Role | Default |
+|-------|------|---------|
+| Parsing | Convert natural language → structured format | `google/gemini-2.0-flash-001` |
+| Generation | Write intelligent pytest code | `deepseek/deepseek-chat-v3-0324:free` |
 
-Files to create
-models/context.py
+**Recommended free models on OpenRouter:**
+- `deepseek/deepseek-chat-v3-0324:free`
+- `google/gemini-2.0-flash-001`
+- `meta-llama/llama-3.3-70b-instruct:free`
+- `qwen/qwen-2.5-coder-32b-instruct:free`
 
-models/test_plan.py
+Models can be changed at runtime via the Settings page or `POST /api/settings`.
 
-models/generated_test.py
+---
 
-Example (do this manually once)
-class Endpoint(BaseModel):
-    name: str
-    method: str
-    requires_auth: bool
+## Test Planning Logic
 
-class SystemContext(BaseModel):
-    endpoints: list[Endpoint]
-    dependencies: list[str]
-👉 Once schemas exist, Copilot becomes 10× better.
+For each endpoint, MindFlayer generates:
 
-🟢 STEP 2 — Context Builder (Copilot-friendly)
-Your job (human)
-Define what context means.
+| Test Type | Description | Expected |
+|-----------|-------------|----------|
+| `positive` | Happy path | 200/201 |
+| `no_auth` | Missing auth header | 401/403 |
+| `dependency_failure` | Required dependency not met | 400/404/409 |
+| `invalid_input` | Invalid path params (e.g. bad ID) | 404 |
 
-Context =
+Then it:
+- **Deduplicates** against existing test names
+- **Calculates** coverage improvement (0–100%)
+- **Reports** gaps and redundancies
 
-endpoints
+---
 
-auth rules
+## Frontend Pages
 
-dependencies
+| Page | Route | Description |
+|------|-------|-------------|
+| Landing | `/` | Hero, pipeline visualization, features grid, CTA |
+| Generate | `/generate` | Requirements input, SSE pipeline, tabbed results (code/coverage/plan) |
+| Settings | `/settings` | Backend status, API key, model selector |
 
-What you ask Copilot
-“Write a function that parses API requirements text and extracts endpoints, HTTP methods, and auth requirements into this schema.”
+### Design
+- Premium dark theme with glassmorphism
+- Smooth micro-animations and hover effects
+- Python syntax highlighting with line numbers
+- Responsive layout (desktop + mobile)
 
-Copilot will:
+---
 
-Regex
+## Environment Variables
 
-Parse
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `OPENROUTER_API_KEY` | No* | OpenRouter API key for LLM features |
+| `PARSING_MODEL` | No | Override parsing model |
+| `GENERATION_MODEL` | No | Override code generation model |
+| `CORS_ORIGINS` | No | Allowed origins (default: localhost:3000,3001) |
+| `PORT` | No | Backend port (default: 8000) |
 
-Fill objects
+*Without an API key, structured parsing and template-based code generation still work.
 
-You review logic — not syntax.
+---
 
-📌 Stop here until this works.
-Context builder is the foundation.
+## Development
 
-🟢 STEP 3 — Test Planner (THIS IS YOUR IP)
-This part you design in plain English first.
+```bash
+# Backend — run with hot reload
+cd backend && uv run python -m uvicorn main:app --reload --port 8000
 
-Planner rules (write as comments)
-# For each endpoint:
-# - generate positive test
-# - if requires_auth → add no-auth test
-# - if depends on another endpoint → add dependency-failure test
-# - skip tests already covered
-Then ask Copilot:
+# Frontend — dev server
+cd frontend && npm run dev
 
-“Implement this planner using the SystemContext schema.”
+# TypeScript check
+cd frontend && npx tsc --noEmit
 
-Copilot excels here because:
+# Backend dependency sync
+cd backend && uv sync
+```
 
-Rules are explicit
+---
 
-Logic is deterministic
+## Troubleshooting
 
-🟢 STEP 4 — Code Generator (LLM-assisted)
-Now we allow AI creativity, but constrained.
-
-You decide ONE output format
-👉 Pick ONE for MVP
-Recommended: PyTest (API tests) or Postman
-
-Generator contract
-Input:
-
-{ "test_name": "order_without_auth" }
-Output:
-
-def test_order_without_auth(client):
-    ...
-Copilot usage
-You write:
-
-def generate_pytest(test_plan: TestPlan) -> str:
-    """
-    Generate pytest API tests for missing scenarios.
-    """
-Copilot will generate 80% of this instantly.
-
-You only:
-
-Adjust naming
-
-Ensure consistency
-
-🟢 STEP 5 — Coverage Validator (Simple but powerful)
-This is not AI-heavy.
-
-What it does
-Compare existing tests vs planned tests
-
-Remove duplicates
-
-Mark gaps
-
-Copilot prompt
-“Given two lists of test names, write logic to find missing, covered, and duplicate tests.”
-
-This is Copilot gold.
-
-🟢 STEP 6 — FastAPI Wiring (boilerplate heaven)
-Now wire everything.
-
-Endpoint
-POST /generate-tests
-
-Pipeline:
-
-Build context
-
-Plan tests
-
-Generate code
-
-Validate coverage
-
-Return output
-
-Copilot handles:
-
-Request models
-
-Response models
-
-Async plumbing
-
-You focus on order of execution.
-
-🟢 STEP 7 — Minimal UI (DO NOT OVERDO)
-Simple page:
-
-Textarea
-
-Button
-
-Code block output
-
-Copilot can generate 90% of this.
-
-Judges don’t score UI.
-
-🧠 HOW TO USE COPILOT CORRECTLY (VERY IMPORTANT)
-❌ Bad Copilot prompts
-“Build an AI test generator”
-
-“Make this smart”
-
-“Use agents”
-
-✅ Good Copilot prompts
-“Implement this function according to these rules”
-
-“Convert this schema into logic”
-
-“Generate pytest code for this test plan”
-
-Think compiler, not chatbot.
-
-⚠️ COMMON COPILOT TRAPS (avoid these)
-❌ Letting Copilot invent architecture
-❌ Letting Copilot add frameworks you didn’t ask for
-❌ Accepting code you don’t understand
-❌ Overusing LangChain too early
-
-If you don’t understand it → delete it.
-
-🏁 DAILY EXECUTION CHECKLIST
-Day 1
-Schemas
-
-Context builder
-
-Day 2
-Planner logic
-
-Test plan output
-
-Day 3
-Code generator
-
-Coverage validator
-
-Day 4
-FastAPI
-
-End‑to‑end run
-
-Day 5
-Demo
-
-Cleanup
-
-Pitch alignment
-
-🏆 FINAL MENTAL MODEL (memorize this)
-Copilot writes code.
-You decide intelligence.
-
-If you keep that rule, you’ll build fast and correctly.
+| Issue | Fix |
+|-------|-----|
+| `ModuleNotFoundError` | Run from `backend/` directory, run `uv sync` |
+| Port 8000 in use | Change with `--port 9000` |
+| `OPENROUTER_API_KEY not set` | Set env var or configure in Settings page |
+| Natural language not parsed | Requires API key — use structured format as fallback |
+| Frontend can't reach backend | Ensure backend is running on port 8000, check CORS |
