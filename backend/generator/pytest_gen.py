@@ -1,39 +1,59 @@
 """Pytest code generator for converting test plans into executable code."""
 import json
 from models.test_plan import TestPlan
-from context.llm_parser import generate_smart_payload
+from models.context import SystemContext
+from context.llm_parser import generate_test_code_with_llm, generate_smart_payload
 
 
-def generate_pytest(test_plan: TestPlan) -> str:
+def generate_pytest(test_plan: TestPlan, context: SystemContext | None = None) -> str:
     """
     Generate pytest code from a test plan.
 
+    Uses LLM (DeepSeek V3 via OpenRouter) to generate intelligent test code.
+    Falls back to template-based generation if LLM is unavailable.
+
     For each scenario:
-      a. "positive": call endpoint with smart LLM payloads, assert response.status_code == 200
-      b. "no_auth": call endpoint without auth header, assert status == 401
+      a. "positive": call endpoint with smart LLM payloads, assert 200
+      b. "no_auth": call endpoint without auth header, assert 401
       c. "dependency_failure": call dependency first, check error handling
-      d. "invalid_input": call with id="invalid", assert status == 404
+      d. "invalid_input": call with id="invalid", assert 404
 
     Args:
         test_plan: TestPlan with scenarios to generate
+        context: Optional SystemContext for endpoint metadata
 
     Returns:
         Complete, runnable pytest code as string
     """
+    # Build endpoint lookup from context
+    endpoint_lookup = {}
+    if context:
+        for ep in context.endpoints:
+            endpoint_lookup[ep.name] = ep
+
     code_lines = [
-        '"""Auto-generated test suite from test plan."""',
+        '"""Auto-generated test suite by MindFlayer."""',
         "import pytest",
         "import json",
-        "from httpx import AsyncClient",
+        "",
+        "",
+        "# ── Fixtures ──────────────────────────────────────────────",
+        "",
+        "@pytest.fixture",
+        "def client():",
+        '    """Provide test client fixture."""',
+        "    from fastapi.testclient import TestClient",
+        "    from main import app",
+        "    return TestClient(app)",
         "",
         "",
         "@pytest.fixture",
-        "async def client():",
-        '    """Provide test client fixture."""',
-        '    from fastapi.testclient import TestClient',
-        '    from main import app',
-        "    return TestClient(app)",
+        "def auth_headers():",
+        '    """Provide authenticated headers."""',
+        '    return {"Authorization": "Bearer test-token-valid"}',
         "",
+        "",
+        "# ── Tests ────────────────────────────────────────────────",
         "",
     ]
 
@@ -43,56 +63,99 @@ def generate_pytest(test_plan: TestPlan) -> str:
         test_type = scenario.test_type
         description = scenario.description
 
-        code_lines.append(f'def test_{test_name}(client):')
-        code_lines.append(f'    """{description}"""')
+        # Get endpoint metadata if available
+        ep = endpoint_lookup.get(endpoint_name)
+        method = ep.method if ep else "GET"
+        path = ep.url_path if ep else "/"
+        requires_auth = ep.requires_auth if ep else False
+        depends_on = ep.depends_on if ep else []
 
-        if test_type == "positive":
-            # Happy path test with smart payload
-            code_lines.extend([
-                "    # Positive test: happy path with realistic payload",
-                "    payload = {",
-                '        "id": "test-123",',
-                '        "name": "Test Item",',
-                '        "status": "active"',
-                "    }",
-                "    response = client.post('/', json=payload)",
-                "    assert response.status_code == 200",
-            ])
+        # Try LLM-generated test code first
+        llm_code = generate_test_code_with_llm(
+            test_name=test_name,
+            endpoint_name=endpoint_name,
+            endpoint_method=method,
+            endpoint_path=path,
+            test_type=test_type,
+            description=description,
+            requires_auth=requires_auth,
+            depends_on=depends_on,
+        )
 
-        elif test_type == "no_auth":
-            # No auth test
-            code_lines.extend([
-                "    # No-auth test: expect 401",
-                "    response = client.get('/', headers={})",
-                "    assert response.status_code == 401",
-            ])
-
-        elif test_type == "dependency_failure":
-            # Dependency failure test
-            code_lines.extend([
-                "    # Dependency failure test",
-                "    # Verify proper error when dependency not met",
-                "    response = client.get('/')",
-                "    assert response.status_code in [400, 409, 422, 424]",
-            ])
-
-        elif test_type == "invalid_input":
-            # Invalid input test
-            code_lines.extend([
-                "    # Invalid input test",
-                "    response = client.get('/?id=invalid')",
-                "    assert response.status_code == 404",
-            ])
+        if llm_code:
+            code_lines.append(llm_code)
+        else:
+            # Fallback: template-based generation
+            code_lines.append(_generate_template_test(
+                test_name=test_name,
+                method=method,
+                path=path,
+                test_type=test_type,
+                description=description,
+                requires_auth=requires_auth,
+            ))
 
         code_lines.append("")
         code_lines.append("")
 
-    # Add test suite summary
+    # Test suite summary
     code_lines.extend([
-        "# Test Suite Summary",
+        "# ── Summary ──────────────────────────────────────────────",
         f"# Total tests: {len(test_plan.scenarios)}",
         f"# Coverage: {test_plan.rationale}",
-        "# Note: Payloads generated with LLM for realistic test data",
+        "# Generated by MindFlayer — AI-powered test intelligence",
     ])
 
     return "\n".join(code_lines)
+
+
+def _generate_template_test(test_name: str, method: str, path: str,
+                             test_type: str, description: str,
+                             requires_auth: bool = False) -> str:
+    """Generate template-based test when LLM is unavailable."""
+    test_path = path.replace(":id", "test-id-123")
+    lines = []
+
+    lines.append(f"def test_{test_name}(client):")
+    lines.append(f'    """{description}"""')
+
+    if test_type == "positive":
+        if method in ("POST", "PUT", "PATCH"):
+            payload = generate_smart_payload(path, method)
+            payload_str = json.dumps(payload, indent=8)
+            lines.extend([
+                f"    payload = {payload_str}",
+                f"    response = client.{method.lower()}('{test_path}', json=payload)",
+                f"    assert response.status_code in [200, 201]",
+                f"    assert response.json() is not None",
+            ])
+        else:
+            lines.extend([
+                f"    response = client.{method.lower()}('{test_path}')",
+                f"    assert response.status_code == 200",
+                f"    assert response.json() is not None",
+            ])
+
+    elif test_type == "no_auth":
+        lines.extend([
+            f"    # No-auth test: expect 401/403",
+            f"    response = client.{method.lower()}('{test_path}', headers={{}})",
+            f"    assert response.status_code in [401, 403]",
+        ])
+
+    elif test_type == "dependency_failure":
+        lines.extend([
+            f"    # Dependency failure: skip required setup, verify error handling",
+            f"    response = client.{method.lower()}('{test_path}')",
+            f"    assert response.status_code in [400, 404, 409, 422, 424]",
+        ])
+
+    elif test_type == "invalid_input":
+        invalid_path = path.replace(":id", "nonexistent-id-999")
+        lines.extend([
+            f"    # Invalid input: non-existent resource",
+            f"    response = client.{method.lower()}('{invalid_path}')",
+            f"    assert response.status_code == 404",
+        ])
+
+    return "\n".join(lines)

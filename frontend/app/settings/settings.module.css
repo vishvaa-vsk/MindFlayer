@@ -1,0 +1,169 @@
+.page {
+    min-height: calc(100vh - 70px);
+    padding: 40px 0 60px;
+}
+
+.container {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 0 24px;
+}
+
+.title {
+    font-size: 2rem;
+    font-weight: 800;
+    margin-bottom: 6px;
+    animation: fadeIn 0.3s ease-out;
+}
+
+.subtitle {
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+    margin-bottom: 32px;
+    animation: fadeIn 0.3s ease-out;
+}
+
+.card {
+    padding: 24px;
+    margin-bottom: 20px;
+    animation: fadeInUp 0.4s ease-out;
+}
+
+.cardTitle {
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 8px;
+}
+
+.cardDesc {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    margin-bottom: 14px;
+    line-height: 1.6;
+}
+
+.cardDesc a {
+    color: var(--accent-primary);
+    text-decoration: underline;
+}
+
+/* ── Status ───────────────────────────────────────────── */
+.statusRow {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    margin-bottom: 12px;
+}
+
+.statusDot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.statusDot.checking {
+    background: var(--accent-warning);
+    animation: pulse 1.5s infinite;
+}
+
+.statusDot.online {
+    background: var(--accent-success);
+    box-shadow: 0 0 8px rgba(16, 185, 129, 0.4);
+}
+
+.statusDot.offline {
+    background: var(--accent-error);
+}
+
+.statusInfo {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+/* ── Fields ───────────────────────────────────────────── */
+.fieldGroup {
+    margin-bottom: 18px;
+}
+
+.fieldLabel {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+}
+
+.fieldHint {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+}
+
+/* ── Model Suggestions ────────────────────────────────── */
+.modelSuggestions {
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border-subtle);
+}
+
+.suggestLabel {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    display: block;
+    margin-bottom: 8px;
+}
+
+.suggestList {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.suggestBtn {
+    padding: 5px 10px;
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    color: var(--text-secondary);
+    background: var(--bg-base);
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.suggestBtn:hover {
+    color: var(--accent-primary);
+    border-color: var(--accent-primary);
+    background: rgba(59, 130, 246, 0.05);
+}
+
+/* ── Actions ──────────────────────────────────────────── */
+.actions {
+    margin-top: 8px;
+    animation: fadeIn 0.3s ease-out;
+}
+
+.error {
+    padding: 10px 16px;
+    background: rgba(239, 68, 68, 0.08);
+    border: 1px solid rgba(239, 68, 68, 0.2);
+    border-radius: var(--radius-md);
+    color: var(--accent-error);
+    font-size: 0.85rem;
+    margin-bottom: 12px;
+}
+
+.success {
+    padding: 10px 16px;
+    background: rgba(16, 185, 129, 0.08);
+    border: 1px solid rgba(16, 185, 129, 0.2);
+    border-radius: var(--radius-md);
+    color: var(--accent-success);
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-bottom: 12px;
+}

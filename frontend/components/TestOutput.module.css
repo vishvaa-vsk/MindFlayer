@@ -1,0 +1,118 @@
+.container {
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border-subtle);
+    overflow: hidden;
+    background: var(--bg-deep);
+    animation: fadeInUp 0.4s ease-out;
+}
+
+.header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 16px;
+    background: var(--bg-surface);
+    border-bottom: 1px solid var(--border-subtle);
+}
+
+.headerLeft {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.dots {
+    display: flex;
+    gap: 6px;
+}
+
+.dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+}
+
+.filename {
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+}
+
+.copyBtn {
+    padding: 5px 12px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    font-family: var(--font-sans);
+    color: var(--text-secondary);
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.copyBtn:hover {
+    color: var(--text-primary);
+    border-color: var(--border-accent);
+}
+
+.codeWrap {
+    display: flex;
+    overflow-x: auto;
+    max-height: 600px;
+    overflow-y: auto;
+}
+
+.lineNumbers {
+    display: flex;
+    flex-direction: column;
+    padding: 16px 12px;
+    background: rgba(0, 0, 0, 0.2);
+    border-right: 1px solid var(--border-subtle);
+    text-align: right;
+    user-select: none;
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    line-height: 1.7;
+    color: var(--text-muted);
+    flex-shrink: 0;
+    margin: 0;
+}
+
+.code {
+    padding: 16px;
+    margin: 0;
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    line-height: 1.7;
+    color: var(--text-primary);
+    flex: 1;
+    min-width: 0;
+    white-space: pre;
+}
+
+/* Syntax highlighting */
+.code :global(.kw) {
+    color: #c084fc;
+}
+
+.code :global(.str) {
+    color: #34d399;
+}
+
+.code :global(.cmt) {
+    color: #64748b;
+    font-style: italic;
+}
+
+.code :global(.dec) {
+    color: #fbbf24;
+}
+
+.code :global(.fn) {
+    color: #60a5fa;
+}
+
+.code :global(.num) {
+    color: #f59e0b;
+}
