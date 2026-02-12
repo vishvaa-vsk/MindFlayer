@@ -217,6 +217,7 @@ def _get_extra_status_codes(test_type: str) -> list[str]:
         "forbidden_role": ["403"],
         "field_validation": ["422"],
         "boundary_value": ["422"],
+        "numeric_boundary": ["422"],
     }.get(test_type, [])
 
 

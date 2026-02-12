@@ -72,6 +72,7 @@ def generate_junit_xml(test_plan: TestPlan, context: SystemContext | None = None
             # For negative tests, add a skipped-style marker showing expected failure
             if scenario.test_type in ("no_auth", "state_conflict", "forbidden_role",
                                         "field_validation", "boundary_value",
+                                        "numeric_boundary",
                                         "dependency_failure", "invalid_input"):
                 system_out = SubElement(testcase, "system-out")
                 system_out.text = (

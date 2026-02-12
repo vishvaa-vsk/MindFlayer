@@ -171,6 +171,11 @@ def _build_payload(scenario, ep, test_type: str) -> dict:
                 elif field.format == "uuid":
                     payload[field.name] = "not-a-uuid"
 
+        if test_type == "numeric_boundary":
+            # Use hint values (negative quantity, zero, etc.)
+            if scenario.payload_hint:
+                payload.update(scenario.payload_hint)
+
         return payload
 
     # Absolute fallback
@@ -238,14 +243,25 @@ def _build_test_script(scenario, test_type: str) -> list[str]:
         ])
     elif test_type == "dependency_failure":
         lines.extend([
-            f'pm.test("Returns error when dependency not met", function () {{',
-            f'    pm.expect(pm.response.code).to.be.oneOf([400, 404, 409, 422, 424]);',
+            f'pm.test("Returns {expected} when dependency not met", function () {{',
+            f'    pm.expect(pm.response.code).to.equal({expected});',
             '});',
         ])
     elif test_type == "invalid_input":
         lines.extend([
             f'pm.test("Returns {expected} for invalid input", function () {{',
             f'    pm.expect(pm.response.code).to.equal({expected});',
+            '});',
+        ])
+    elif test_type == "numeric_boundary":
+        lines.extend([
+            f'pm.test("Returns {expected} for numeric boundary violation", function () {{',
+            f'    pm.expect(pm.response.code).to.equal({expected});',
+            '});',
+            '',
+            'pm.test("Response explains validation error", function () {',
+            '    var jsonData = pm.response.json();',
+            '    pm.expect(jsonData.detail || jsonData.errors).to.not.be.undefined;',
             '});',
         ])
 

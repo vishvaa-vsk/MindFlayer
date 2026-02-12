@@ -82,6 +82,7 @@ def _get_tags(test_type: str) -> str:
         "forbidden_role": "@security @rbac @negative",
         "field_validation": "@validation @negative",
         "boundary_value": "@validation @boundary @negative",
+        "numeric_boundary": "@validation @numeric @domain-reasoning @negative",
     }
     return tags_map.get(test_type, "@test")
 
@@ -195,5 +196,17 @@ def _generate_steps(scenario, ep, method: str, path: str) -> list[str]:
         steps.append(f'When I send a {method} request to "{test_path}"')
         steps.append(f'Then the response status should be {scenario.expected_status}')
         steps.append('And the response should indicate the boundary violation')
+
+    elif test_type == "numeric_boundary":
+        hint = scenario.payload_hint or {}
+        field_name = next(iter(hint), "quantity")
+        field_value = hint.get(field_name, -1)
+        steps.append(f'Given a request payload with "{field_name}" set to {field_value}')
+        steps.append(f'And the value violates the numeric domain constraint')
+        if requires_auth:
+            steps.append("And the user is authenticated")
+        steps.append(f'When I send a {method} request to "{test_path}"')
+        steps.append(f'Then the response status should be {scenario.expected_status}')
+        steps.append('And the response should explain the numeric validation error')
 
     return steps

@@ -5,13 +5,14 @@ from pydantic import BaseModel, field_validator
 # All supported test types
 VALID_TEST_TYPES = {
     "positive",           # Happy path — expect success
-    "no_auth",            # Missing auth — expect 401/403
-    "dependency_failure", # Skip required setup — expect 400/404/409/422
+    "no_auth",            # Missing auth — expect 401
+    "dependency_failure", # Skip required setup — expect 404
     "invalid_input",      # Bad ID/params — expect 404
     "state_conflict",     # Violate state constraint — expect 409
     "forbidden_role",     # Wrong role — expect 403
     "field_validation",   # Invalid field format/required — expect 422
     "boundary_value",     # Exceed min/max length — expect 422
+    "numeric_boundary",   # Violate numeric min/max (quantity, price) — expect 422
 }
 
 

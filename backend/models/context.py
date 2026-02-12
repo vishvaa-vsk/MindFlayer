@@ -15,6 +15,8 @@ class FieldSpec(BaseModel):
     example: str | None = None
     min_length: int | None = None
     max_length: int | None = None
+    minimum: int | float | None = None    # Numeric: minimum value (e.g., quantity >= 0)
+    maximum: int | float | None = None    # Numeric: maximum value (e.g., quantity <= 10000)
     enum: list[str] | None = None
     description: str | None = None
 
@@ -29,6 +31,10 @@ class FieldSpec(BaseModel):
             prop["minLength"] = self.min_length
         if self.max_length is not None:
             prop["maxLength"] = self.max_length
+        if self.minimum is not None:
+            prop["minimum"] = self.minimum
+        if self.maximum is not None:
+            prop["maximum"] = self.maximum
         if self.enum:
             prop["enum"] = self.enum
         if self.description:
@@ -38,6 +44,17 @@ class FieldSpec(BaseModel):
     def example_value(self) -> str | int | float | bool:
         """Generate a realistic example value for test payloads."""
         if self.example is not None:
+            # Return typed value for numeric fields
+            if self.field_type == "integer" and isinstance(self.example, str):
+                try:
+                    return int(self.example)
+                except (ValueError, TypeError):
+                    return self.example
+            if self.field_type == "number" and isinstance(self.example, str):
+                try:
+                    return float(self.example)
+                except (ValueError, TypeError):
+                    return self.example
             return self.example
         if self.enum:
             return self.enum[0]

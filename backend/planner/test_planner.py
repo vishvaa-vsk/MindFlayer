@@ -80,10 +80,11 @@ def plan_tests(context: SystemContext, existing_tests: list[str] = None) -> Test
         # ── 3. Dependency failure test ──
         if endpoint.depends_on:
             for dep in endpoint.depends_on:
+                # 404: resource from dependency doesn't exist because setup was skipped
                 _add(
                     name=f"{base_name}_dependency_fail_{dep}",
                     endpoint=endpoint.name,
-                    description=f"Verify {endpoint.name} fails when dependency '{dep}' is not fulfilled",
+                    description=f"Verify {endpoint.name} returns 404 when dependency '{dep}' resource does not exist",
                     test_type="dependency_failure",
                     expected_status=404,
                 )
@@ -179,7 +180,7 @@ def plan_tests(context: SystemContext, existing_tests: list[str] = None) -> Test
                 payload_hint={"_omit_field": key_field.name},
             )
 
-        # ── 8. Boundary value tests ──
+        # ── 8. Boundary value tests (string length) ──
         boundary_fields = [f for f in endpoint.request_body
                            if f.min_length is not None or f.max_length is not None]
         for field in boundary_fields[:2]:  # Limit to 2 boundary tests
@@ -196,6 +197,37 @@ def plan_tests(context: SystemContext, existing_tests: list[str] = None) -> Test
                     expected_status=422,
                     payload_hint={field.name: short_value},
                 )
+
+        # ── 9. Numeric boundary tests (domain reasoning) ──
+        numeric_fields = [f for f in endpoint.request_body
+                          if f.minimum is not None or f.maximum is not None]
+        for field in numeric_fields[:2]:  # Limit to 2 numeric tests
+            if field.minimum is not None:
+                below_min = field.minimum - 1
+                _add(
+                    name=f"{base_name}_negative_{field.name}",
+                    endpoint=endpoint.name,
+                    description=(
+                        f"Verify {method} {path} returns 422 when '{field.name}' "
+                        f"is {below_min} (below minimum {field.minimum})"
+                    ),
+                    test_type="numeric_boundary",
+                    expected_status=422,
+                    payload_hint={field.name: below_min},
+                )
+                # Zero boundary test when minimum > 0
+                if field.minimum > 0:
+                    _add(
+                        name=f"{base_name}_zero_{field.name}",
+                        endpoint=endpoint.name,
+                        description=(
+                            f"Verify {method} {path} returns 422 when '{field.name}' "
+                            f"is 0 (minimum is {field.minimum})"
+                        ),
+                        test_type="numeric_boundary",
+                        expected_status=422,
+                        payload_hint={field.name: 0},
+                    )
 
     # Build rationale
     type_counts = {}

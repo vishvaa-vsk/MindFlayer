@@ -141,7 +141,7 @@ def _generate_template_test(test_name: str, method: str, path: str,
                 lines.append(f"    response = client.{method.lower()}('{test_path}', json=payload, headers=auth_headers)")
             else:
                 lines.append(f"    response = client.{method.lower()}('{test_path}', json=payload)")
-            lines.append(f"    assert response.status_code in [200, 201]")
+            lines.append(f"    assert response.status_code == {expected_status}")
             lines.append(f"    data = response.json()")
             lines.append(f"    assert data is not None")
             # Verify key fields are returned
@@ -164,7 +164,7 @@ def _generate_template_test(test_name: str, method: str, path: str,
             lines.append(f"    response = client.{method.lower()}('{test_path}', json=payload, headers={{}})")
         else:
             lines.append(f"    response = client.{method.lower()}('{test_path}', headers={{}})")
-        lines.append(f"    assert response.status_code in [401, 403]")
+        lines.append(f"    assert response.status_code == 401")
 
     elif test_type == "dependency_failure":
         lines.append(f"    # Dependency failure: skip required setup, verify error handling")
@@ -172,7 +172,7 @@ def _generate_template_test(test_name: str, method: str, path: str,
             lines.append(f"    response = client.{method.lower()}('{test_path}', headers=auth_headers)")
         else:
             lines.append(f"    response = client.{method.lower()}('{test_path}')")
-        lines.append(f"    assert response.status_code in [400, 404, 409, 422, 424]")
+        lines.append(f"    assert response.status_code == {expected_status}")
 
     elif test_type == "invalid_input":
         invalid_path = path.replace(":id", "nonexistent-id-999")
@@ -249,6 +249,23 @@ def _generate_template_test(test_name: str, method: str, path: str,
         else:
             lines.append(f"    response = client.{method.lower()}('{test_path}', json=payload)")
         lines.append(f"    assert response.status_code == 422")
+
+    elif test_type == "numeric_boundary":
+        hint = scenario.payload_hint if scenario else {}
+        field_name = next(iter(hint), "quantity") if hint else "quantity"
+        field_value = hint.get(field_name, -1) if hint else -1
+        lines.append(f"    # Numeric boundary: {field_name}={field_value} violates domain constraint")
+        payload = _get_payload(endpoint, scenario)
+        payload[field_name] = field_value
+        payload_str = json.dumps(payload, indent=8)
+        lines.append(f"    payload = {payload_str}")
+        if requires_auth:
+            lines.append(f"    response = client.{method.lower()}('{test_path}', json=payload, headers=auth_headers)")
+        else:
+            lines.append(f"    response = client.{method.lower()}('{test_path}', json=payload)")
+        lines.append(f"    assert response.status_code == 422")
+        lines.append(f"    error_data = response.json()")
+        lines.append(f"    assert 'detail' in error_data or 'errors' in error_data  # Validation error expected")
 
     return "\n".join(lines)
 
