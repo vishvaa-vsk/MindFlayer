@@ -1,199 +1,257 @@
 .page {
-    min-height: calc(100vh - 70px);
-    padding: 40px 0 60px;
+  min-height: calc(100vh - 70px);
+  padding: 40px 0 60px;
 }
 
 .container {
-    max-width: 960px;
-    margin: 0 auto;
-    padding: 0 24px;
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 0 24px;
 }
 
 .header {
-    margin-bottom: 32px;
-    animation: fadeIn 0.3s ease-out;
+  margin-bottom: 32px;
+  animation: fadeIn 0.3s ease-out;
 }
 
 .title {
-    font-size: 2rem;
-    font-weight: 800;
-    margin-bottom: 8px;
+  font-size: 2rem;
+  font-weight: 800;
+  margin-bottom: 8px;
 }
 
 .subtitle {
-    color: var(--text-secondary);
-    font-size: 0.95rem;
-    line-height: 1.6;
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+  line-height: 1.6;
 }
 
 /* ── Input Section ────────────────────────────────────── */
 .inputSection {
-    margin-bottom: 24px;
-    animation: fadeInUp 0.4s ease-out;
+  margin-bottom: 24px;
+  animation: fadeInUp 0.4s ease-out;
 }
 
 .inputHeader {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
 }
 
 .inputLabel {
-    font-size: 0.9rem;
-    font-weight: 600;
-    color: var(--text-primary);
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-primary);
 }
 
 .examples {
-    display: flex;
-    gap: 4px;
+  display: flex;
+  gap: 4px;
 }
 
 .existingTests {
-    margin-top: 12px;
+  margin-top: 12px;
 }
 
 .existingTestsSummary {
-    font-size: 0.85rem;
-    color: var(--text-secondary);
-    cursor: pointer;
-    padding: 8px 0;
-    user-select: none;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: 8px 0;
+  user-select: none;
 }
 
 .existingTestsSummary:hover {
-    color: var(--text-primary);
+  color: var(--text-primary);
 }
 
 .generateBtn {
-    width: 100%;
-    margin-top: 16px;
-    padding: 16px 32px;
-    font-size: 1rem;
+  width: 100%;
+  margin-top: 16px;
+  padding: 16px 32px;
+  font-size: 1rem;
+}
+
+/* ── Format Selector ─────────────────────────────────── */
+.formatSelector {
+  margin-top: 16px;
+}
+
+.formatLabel {
+  display: block;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+}
+
+.formatGrid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.formatChip {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  font-family: var(--font-sans);
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  user-select: none;
+}
+
+.formatChip:hover {
+  color: var(--text-primary);
+  border-color: var(--border-default);
+  background: var(--bg-elevated);
+}
+
+.formatChipActive {
+  color: var(--text-accent) !important;
+  border-color: var(--accent-primary) !important;
+  background: rgba(59, 130, 246, 0.08) !important;
+  box-shadow: 0 0 0 1px var(--accent-primary);
+}
+
+.formatChip:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.formatIcon {
+  font-size: 1rem;
 }
 
 /* ── Error ────────────────────────────────────────────── */
 .error {
-    margin-top: 16px;
-    padding: 14px 18px;
-    background: rgba(239, 68, 68, 0.08);
-    border: 1px solid rgba(239, 68, 68, 0.2);
-    border-radius: var(--radius-md);
-    color: var(--accent-error);
-    font-size: 0.9rem;
-    animation: fadeIn 0.3s ease-out;
+  margin-top: 16px;
+  padding: 14px 18px;
+  background: rgba(239, 68, 68, 0.08);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  border-radius: var(--radius-md);
+  color: var(--accent-error);
+  font-size: 0.9rem;
+  animation: fadeIn 0.3s ease-out;
 }
 
 /* ── Results ──────────────────────────────────────────── */
 .results {
-    margin-top: 32px;
-    animation: fadeInUp 0.5s ease-out;
+  margin-top: 32px;
+  animation: fadeInUp 0.5s ease-out;
 }
 
 /* ── Tabs ─────────────────────────────────────────────── */
 .tabs {
-    display: flex;
-    gap: 4px;
-    margin-bottom: 20px;
-    padding: 4px;
-    background: var(--bg-surface);
-    border-radius: var(--radius-md);
-    border: 1px solid var(--border-subtle);
+  display: flex;
+  gap: 4px;
+  margin-bottom: 20px;
+  padding: 4px;
+  background: var(--bg-surface);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-subtle);
 }
 
 .tab {
-    flex: 1;
-    padding: 10px 16px;
-    font-family: var(--font-sans);
-    font-size: 0.85rem;
-    font-weight: 600;
-    color: var(--text-secondary);
-    background: transparent;
-    border: none;
-    border-radius: var(--radius-sm);
-    cursor: pointer;
-    transition: all var(--transition-fast);
+  flex: 1;
+  padding: 10px 16px;
+  font-family: var(--font-sans);
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all var(--transition-fast);
 }
 
 .tab:hover {
-    color: var(--text-primary);
-    background: var(--bg-elevated);
+  color: var(--text-primary);
+  background: var(--bg-elevated);
 }
 
 .tabActive {
-    color: var(--text-primary) !important;
-    background: var(--bg-elevated) !important;
-    box-shadow: var(--shadow-sm);
+  color: var(--text-primary) !important;
+  background: var(--bg-elevated) !important;
+  box-shadow: var(--shadow-sm);
 }
 
 .tabContent {
-    min-height: 200px;
+  min-height: 200px;
 }
 
 /* ── Plan View ────────────────────────────────────────── */
 .planView {
-    animation: fadeIn 0.3s ease-out;
+  animation: fadeIn 0.3s ease-out;
 }
 
 .planRationale {
-    padding: 14px 18px;
-    background: var(--bg-surface);
-    border: 1px solid var(--border-subtle);
-    border-radius: var(--radius-md);
-    font-size: 0.85rem;
-    color: var(--text-secondary);
-    margin-bottom: 20px;
-    line-height: 1.6;
+  padding: 14px 18px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  margin-bottom: 20px;
+  line-height: 1.6;
 }
 
 .planRationale strong {
-    color: var(--text-primary);
+  color: var(--text-primary);
 }
 
 .scenarioGrid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 12px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 12px;
 }
 
 .scenarioCard {
-    padding: 16px;
+  padding: 16px;
 }
 
 .scenarioHeader {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: 8px;
-    margin-bottom: 8px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
 }
 
 .scenarioName {
-    font-family: var(--font-mono);
-    font-size: 0.78rem;
-    color: var(--text-accent);
-    word-break: break-all;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  color: var(--text-accent);
+  word-break: break-all;
 }
 
 .scenarioDesc {
-    font-size: 0.82rem;
-    color: var(--text-secondary);
-    line-height: 1.5;
-    margin-bottom: 10px;
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  margin-bottom: 10px;
 }
 
 .scenarioEndpoint {
-    display: flex;
+  display: flex;
 }
 
 /* ── LLM Badge ────────────────────────────────────────── */
 .llmBadge {
-    margin-top: 16px;
-    padding: 10px 16px;
-    background: rgba(139, 92, 246, 0.08);
-    border: 1px solid rgba(139, 92, 246, 0.2);
-    border-radius: var(--radius-md);
-    font-size: 0.82rem;
-    color: var(--accent-purple);
+  margin-top: 16px;
+  padding: 10px 16px;
+  background: rgba(139, 92, 246, 0.08);
+  border: 1px solid rgba(139, 92, 246, 0.2);
+  border-radius: var(--radius-md);
+  font-size: 0.82rem;
+  color: var(--accent-purple);
 }

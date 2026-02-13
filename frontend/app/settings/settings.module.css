@@ -1,169 +1,337 @@
 .page {
-    min-height: calc(100vh - 70px);
-    padding: 40px 0 60px;
+  min-height: calc(100vh - 70px);
+  padding: 40px 0 60px;
 }
 
 .container {
-    max-width: 720px;
-    margin: 0 auto;
-    padding: 0 24px;
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 0 24px;
 }
 
 .title {
-    font-size: 2rem;
-    font-weight: 800;
-    margin-bottom: 6px;
-    animation: fadeIn 0.3s ease-out;
+  font-size: 2rem;
+  font-weight: 800;
+  margin-bottom: 6px;
+  animation: fadeIn 0.3s ease-out;
 }
 
 .subtitle {
-    color: var(--text-secondary);
-    font-size: 0.95rem;
-    margin-bottom: 32px;
-    animation: fadeIn 0.3s ease-out;
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+  margin-bottom: 32px;
+  animation: fadeIn 0.3s ease-out;
 }
 
 .card {
-    padding: 24px;
-    margin-bottom: 20px;
-    animation: fadeInUp 0.4s ease-out;
+  padding: 24px;
+  margin-bottom: 20px;
+  animation: fadeInUp 0.4s ease-out;
 }
 
 .cardTitle {
-    font-size: 1.1rem;
-    font-weight: 700;
-    margin-bottom: 8px;
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin-bottom: 8px;
 }
 
 .cardDesc {
-    font-size: 0.85rem;
-    color: var(--text-secondary);
-    margin-bottom: 14px;
-    line-height: 1.6;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  margin-bottom: 14px;
+  line-height: 1.6;
 }
 
 .cardDesc a {
-    color: var(--accent-primary);
-    text-decoration: underline;
+  color: var(--accent-primary);
+  text-decoration: underline;
 }
 
 /* ── Status ───────────────────────────────────────────── */
 .statusRow {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font-size: 0.9rem;
-    color: var(--text-secondary);
-    margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  margin-bottom: 12px;
 }
 
 .statusDot {
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    flex-shrink: 0;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
 }
 
 .statusDot.checking {
-    background: var(--accent-warning);
-    animation: pulse 1.5s infinite;
+  background: var(--accent-warning);
+  animation: pulse 1.5s infinite;
 }
 
 .statusDot.online {
-    background: var(--accent-success);
-    box-shadow: 0 0 8px rgba(16, 185, 129, 0.4);
+  background: var(--accent-success);
+  box-shadow: 0 0 8px rgba(16, 185, 129, 0.4);
 }
 
 .statusDot.offline {
-    background: var(--accent-error);
+  background: var(--accent-error);
 }
 
 .statusInfo {
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
 }
 
 /* ── Fields ───────────────────────────────────────────── */
 .fieldGroup {
-    margin-bottom: 18px;
+  margin-bottom: 18px;
 }
 
 .fieldLabel {
-    display: block;
-    font-size: 0.85rem;
-    font-weight: 600;
-    color: var(--text-primary);
-    margin-bottom: 4px;
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 4px;
 }
 
 .fieldHint {
-    font-size: 0.78rem;
-    color: var(--text-muted);
-    margin-bottom: 8px;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  margin-bottom: 8px;
 }
 
 /* ── Model Suggestions ────────────────────────────────── */
 .modelSuggestions {
-    margin-top: 16px;
-    padding-top: 16px;
-    border-top: 1px solid var(--border-subtle);
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border-subtle);
 }
 
 .suggestLabel {
-    font-size: 0.8rem;
-    color: var(--text-muted);
-    display: block;
-    margin-bottom: 8px;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  display: block;
+  margin-bottom: 8px;
 }
 
 .suggestList {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
 }
 
 .suggestBtn {
-    padding: 5px 10px;
-    font-family: var(--font-mono);
-    font-size: 0.72rem;
-    color: var(--text-secondary);
-    background: var(--bg-base);
-    border: 1px solid var(--border-default);
-    border-radius: var(--radius-sm);
-    cursor: pointer;
-    transition: all var(--transition-fast);
+  padding: 5px 10px;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--text-secondary);
+  background: var(--bg-base);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all var(--transition-fast);
 }
 
 .suggestBtn:hover {
-    color: var(--accent-primary);
-    border-color: var(--accent-primary);
-    background: rgba(59, 130, 246, 0.05);
+  color: var(--accent-primary);
+  border-color: var(--accent-primary);
+  background: rgba(59, 130, 246, 0.05);
 }
 
 /* ── Actions ──────────────────────────────────────────── */
 .actions {
-    margin-top: 8px;
-    animation: fadeIn 0.3s ease-out;
+  margin-top: 8px;
+  animation: fadeIn 0.3s ease-out;
 }
 
 .error {
-    padding: 10px 16px;
-    background: rgba(239, 68, 68, 0.08);
-    border: 1px solid rgba(239, 68, 68, 0.2);
-    border-radius: var(--radius-md);
-    color: var(--accent-error);
-    font-size: 0.85rem;
-    margin-bottom: 12px;
+  padding: 10px 16px;
+  background: rgba(239, 68, 68, 0.08);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  border-radius: var(--radius-md);
+  color: var(--accent-error);
+  font-size: 0.85rem;
+  margin-bottom: 12px;
 }
 
 .success {
-    padding: 10px 16px;
-    background: rgba(16, 185, 129, 0.08);
-    border: 1px solid rgba(16, 185, 129, 0.2);
-    border-radius: var(--radius-md);
-    color: var(--accent-success);
-    font-size: 0.85rem;
-    font-weight: 600;
-    margin-bottom: 12px;
+  padding: 10px 16px;
+  background: rgba(16, 185, 129, 0.08);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  border-radius: var(--radius-md);
+  color: var(--accent-success);
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+
+/* ── Provider Grid ────────────────────────────────────── */
+.providerGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 12px;
+}
+
+.providerCard {
+  padding: 16px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all var(--transition-base);
+  text-align: left;
+}
+
+.providerCard:hover:not(:disabled) {
+  border-color: var(--accent-primary);
+  background: var(--bg-elevated);
+  box-shadow: 0 0 20px rgba(59, 130, 246, 0.1);
+}
+
+.providerCardActive {
+  border-color: var(--accent-primary) !important;
+  background: rgba(59, 130, 246, 0.08) !important;
+  box-shadow: 0 0 0 2px var(--accent-primary) !important;
+}
+
+.providerCardBlocked {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.providerCardBlocked:hover {
+  border-color: var(--border-subtle) !important;
+  background: var(--bg-surface) !important;
+  box-shadow: none !important;
+}
+
+.providerHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.providerIcon {
+  font-size: 1.4rem;
+}
+
+.providerName {
+  font-weight: 600;
+  color: var(--text-primary);
+  flex: 1;
+}
+
+.providerStatus {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+}
+
+.providerOnline {
+  color: var(--accent-success) !important;
+}
+
+.providerOffline {
+  color: var(--text-muted) !important;
+}
+
+.providerDesc {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  line-height: 1.4;
+  margin-bottom: 8px;
+}
+
+.localBadge {
+  display: inline-block;
+  padding: 3px 8px;
+  background: rgba(16, 185, 129, 0.15);
+  color: var(--accent-success);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  border-radius: 4px;
+  font-size: 0.7rem;
+  font-weight: 600;
+}
+
+/* ── Toggle Switch ────────────────────────────────────── */
+.toggleRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.toggle {
+  position: relative;
+  width: 50px;
+  height: 28px;
+  background: var(--bg-base);
+  border: 1px solid var(--border-default);
+  border-radius: 14px;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  flex-shrink: 0;
+}
+
+.toggle:hover {
+  border-color: var(--border-accent);
+}
+
+.toggleActive {
+  background: rgba(59, 130, 246, 0.2);
+  border-color: var(--accent-primary);
+}
+
+.toggleDot {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 22px;
+  height: 22px;
+  background: var(--accent-primary);
+  border-radius: 50%;
+  transition: all var(--transition-fast);
+}
+
+.toggleActive .toggleDot {
+  left: 25px;
+}
+
+.privacyWarning {
+  margin-top: 12px;
+  padding: 12px 16px;
+  background: rgba(245, 158, 11, 0.08);
+  border: 1px solid rgba(245, 158, 11, 0.2);
+  border-radius: var(--radius-md);
+  color: var(--accent-warning);
+  font-size: 0.85rem;
+}
+
+/* ── Input with Chips ───────────────────────────────── */
+.chipContainer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 8px 0;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 10px;
+  background: rgba(59, 130, 246, 0.1);
+  color: var(--accent-primary);
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  border-radius: 16px;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.chip:hover {
+  background: rgba(59, 130, 246, 0.15);
+  border-color: rgba(59, 130, 246, 0.5);
 }
