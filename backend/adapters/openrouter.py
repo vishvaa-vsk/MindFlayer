@@ -34,6 +34,7 @@ class OpenRouterAdapter(ModelAdapter):
         return OpenAI(
             base_url=settings.openrouter_base_url,
             api_key=settings.openrouter_api_key,
+            timeout=30.0,  # 30 second timeout for API calls
         )
 
     def _do_chat(self, messages: list[dict], model: str, temperature: float, max_tokens: int) -> str:

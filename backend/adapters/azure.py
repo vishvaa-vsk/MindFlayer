@@ -34,6 +34,7 @@ class AzureAdapter(ModelAdapter):
             azure_endpoint=settings.azure_endpoint,
             api_key=settings.azure_api_key,
             api_version=settings.azure_api_version,
+            timeout=30.0,  # 30 second timeout for API calls
         )
 
     def _resolve_deployment(self, model: str) -> str:

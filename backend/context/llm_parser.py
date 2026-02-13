@@ -206,7 +206,9 @@ Write the pytest function:"""
             lines = code.split("\n")
             code = "\n".join(lines[1:-1] if lines[-1].strip() == "```" else lines[1:])
         return code
-    except Exception:
+    except Exception as e:
+        # Log timeout and other errors, then fall back to template generation
+        logger.debug(f"LLM code generation failed (falling back to template): {str(e)[:100]}")
         return ""  # Fallback to template
 
 

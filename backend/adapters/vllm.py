@@ -28,6 +28,7 @@ class VLLMAdapter(ModelAdapter):
         return OpenAI(
             base_url=base_url,
             api_key="not-needed",  # vLLM doesn't require auth locally
+            timeout=30.0,  # 30 second timeout for API calls
         )
 
     def _do_chat(self, messages: list[dict], model: str, temperature: float, max_tokens: int) -> str:

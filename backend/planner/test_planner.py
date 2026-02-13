@@ -39,11 +39,12 @@ def plan_tests(context: SystemContext, existing_tests: list[str] = None) -> Test
 
     existing_tests_set = set(existing_tests)
     scenarios = []
+    added_names = set()  # Track test names added in this run to prevent duplicates
 
     def _add(name: str, endpoint: str, description: str, test_type: str,
              expected_status: int = 200, payload_hint: dict | None = None):
-        """Add scenario if not already existing."""
-        if name not in existing_tests_set:
+        """Add scenario if not already existing or added in this run."""
+        if name not in existing_tests_set and name not in added_names:
             scenarios.append(TestScenario(
                 test_name=name,
                 endpoint=endpoint,
@@ -52,6 +53,7 @@ def plan_tests(context: SystemContext, existing_tests: list[str] = None) -> Test
                 expected_status=expected_status,
                 payload_hint=payload_hint,
             ))
+            added_names.add(name)
 
     for endpoint in context.endpoints:
         base_name = endpoint.name
@@ -105,8 +107,9 @@ def plan_tests(context: SystemContext, existing_tests: list[str] = None) -> Test
             if constraint.allowed_values:
                 # Generate test: try the action when NOT in allowed state
                 conflict_state = blocked[0] if blocked else "completed"
+                allowed_str = "_".join(str(v).lower()[:3] for v in constraint.allowed_values[:2])
                 _add(
-                    name=f"{base_name}_state_conflict_{constraint.field}",
+                    name=f"{base_name}_state_conflict_{constraint.field}_{allowed_str}",
                     endpoint=endpoint.name,
                     description=(
                         f"Verify {method} {path} returns {constraint.error_code} "
@@ -119,7 +122,7 @@ def plan_tests(context: SystemContext, existing_tests: list[str] = None) -> Test
                 )
             for blocked_val in blocked:
                 _add(
-                    name=f"{base_name}_state_blocked_{blocked_val}",
+                    name=f"{base_name}_state_blocked_{constraint.field}_{blocked_val}",
                     endpoint=endpoint.name,
                     description=(
                         f"Verify {method} {path} returns {constraint.error_code} "
