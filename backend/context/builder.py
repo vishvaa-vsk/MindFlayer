@@ -12,6 +12,19 @@ from context.code_analyzer import analyze_code_files
 logger = logging.getLogger(__name__)
 
 
+def is_python_class_file(text: str) -> bool:
+    """Check if text is Python source code with classes (not API requirements)."""
+    indicators = [
+        re.search(r"^class\s+\w+", text, re.MULTILINE),
+        re.search(r"^def\s+\w+\(.*self", text, re.MULTILINE),
+        text.startswith("\"\"\"") or text.startswith("'''"),
+        re.search(r"from\s+typing\s+import", text),
+        re.search(r"import\s+(re|os|sys|json)", text)
+    ]
+    # If 3+ indicators, likely source code
+    return sum(bool(x) for x in indicators) >= 3
+
+
 def is_structured_format(text: str) -> bool:
     """
     Check if text is already in structured format.
@@ -54,6 +67,20 @@ def parse_requirements_text(
         ValueError: If requirements are malformed or LLM fails
     """
     original_text = text  # Keep for schema inference
+
+    # ── Detect if user uploaded source code instead of requirements ──
+    if is_python_class_file(text):
+        raise ValueError(
+            "❌ Error: You uploaded Python source code, but MindFlayer expects API requirements.\n\n"
+            "MindFlayer generates tests for REST APIs, not Python classes.\n\n"
+            "Choose one:\n"
+            "1. Create a FastAPI/Flask wrapper for your class and upload that\n"
+            "2. Use structured requirements format:\n"
+            "   POST /payments (requires merchant_auth)\n"
+            "   GET /payments/:id (requires merchant_auth, depends on POST /payments)\n\n"
+            "3. For unit tests of Python classes, use a different tool (e.g., pytest-generator)\n\n"
+            "See payment_api_example.py and payment_api_requirements.txt for examples."
+        )
 
     # Check if text is already structured or needs LLM parsing
     if not is_structured_format(text):

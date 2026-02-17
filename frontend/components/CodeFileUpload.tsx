@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useCallback, useRef } from "react";
+import { FilePy, FolderOpen, FileText } from "@phosphor-icons/react";
 import styles from "./CodeFileUpload.module.css";
 
 interface CodeFile {
@@ -143,7 +144,8 @@ export default function CodeFileUpload({
     <div className={styles.container}>
       <div className={styles.header}>
         <label className={styles.label}>
-          📁 Code Files <span className={styles.optional}>(Optional)</span>
+          <FolderOpen size={20} weight="duotone" /> Code Files{" "}
+          <span className={styles.optional}>(Optional)</span>
         </label>
         <p className={styles.description}>
           Upload Python source files to extract real enums, validators, and
@@ -168,7 +170,9 @@ export default function CodeFileUpload({
         />
 
         <div className={styles.dropzoneContent}>
-          <div className={styles.dropzoneIcon}>📄</div>
+          <div className={styles.dropzoneIcon}>
+            <FileText size={48} weight="duotone" />
+          </div>
           <div className={styles.dropzoneText}>
             <strong>Drop Python files here</strong> or{" "}
             <button
@@ -204,7 +208,9 @@ export default function CodeFileUpload({
 
           {files.map((file) => (
             <div key={file.name} className={styles.fileItem}>
-              <div className={styles.fileIcon}>🐍</div>
+              <div className={styles.fileIcon}>
+                <FilePy size={24} weight="duotone" />
+              </div>
               <div className={styles.fileInfo}>
                 <div className={styles.fileName}>{file.name}</div>
                 <div className={styles.fileSize}>{formatSize(file.size)}</div>

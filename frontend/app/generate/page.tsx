@@ -1,6 +1,20 @@
 "use client";
 
 import { useState, useCallback, useEffect } from "react";
+import {
+  FilePy,
+  PaperPlaneTilt,
+  Flask,
+  Leaf,
+  FileCode,
+  Sparkle,
+  Brain,
+  ChartBar,
+  ListChecks,
+  ChatCenteredText,
+  PlusCircle,
+  Robot,
+} from "@phosphor-icons/react";
 import styles from "./generate.module.css";
 import PipelineVisualizer from "@/components/PipelineVisualizer";
 import TestOutput from "@/components/TestOutput";
@@ -30,12 +44,12 @@ view their order history, and cancel pending orders.
 Admin users can manage products and view all orders. 
 Payment processing requires a valid order.`;
 
-const FORMAT_ICONS: Record<string, string> = {
-  pytest: "🐍",
-  postman: "📮",
-  junit: "🧪",
-  gherkin: "🥒",
-  openapi: "📋",
+const FORMAT_ICONS: Record<string, any> = {
+  pytest: FilePy,
+  postman: PaperPlaneTilt,
+  junit: Flask,
+  gherkin: Leaf,
+  openapi: FileCode,
 };
 
 const FORMAT_LANGUAGES: Record<string, string> = {
@@ -78,35 +92,35 @@ export default function GeneratePage() {
         pytest: {
           name: "Pytest",
           description: "Python pytest suite",
-          icon: "🐍",
+          icon: "pytest",
           language: "python",
           extension: ".py",
         },
         postman: {
           name: "Postman",
           description: "Postman Collection",
-          icon: "📮",
+          icon: "postman",
           language: "json",
           extension: ".json",
         },
         junit: {
           name: "JUnit XML",
           description: "JUnit XML report",
-          icon: "🧪",
+          icon: "junit",
           language: "xml",
           extension: ".xml",
         },
         gherkin: {
           name: "Gherkin",
           description: "BDD feature file",
-          icon: "🥒",
+          icon: "gherkin",
           language: "gherkin",
           extension: ".feature",
         },
         openapi: {
           name: "OpenAPI",
           description: "OpenAPI 3.0 spec",
-          icon: "📋",
+          icon: "openapi",
           language: "yaml",
           extension: ".yaml",
         },
@@ -216,13 +230,13 @@ export default function GeneratePage() {
                 className="btn btn-ghost"
                 onClick={() => loadExample("structured")}
               >
-                📝 Structured Example
+                <ListChecks size={18} weight="duotone" /> Structured Example
               </button>
               <button
                 className="btn btn-ghost"
                 onClick={() => loadExample("prose")}
               >
-                💬 Prose Example
+                <ChatCenteredText size={18} weight="duotone" /> Prose Example
               </button>
             </div>
           </div>
@@ -238,7 +252,8 @@ export default function GeneratePage() {
           {/* Existing Tests (collapsible) */}
           <details className={styles.existingTests}>
             <summary className={styles.existingTestsSummary}>
-              ➕ Existing test names (optional — for deduplication)
+              <PlusCircle size={16} weight="bold" /> Existing test names
+              (optional — for deduplication)
             </summary>
             <textarea
               className="input"
@@ -258,20 +273,23 @@ export default function GeneratePage() {
           <div className={styles.formatSelector}>
             <label className={styles.formatLabel}>Output Formats</label>
             <div className={styles.formatGrid}>
-              {Object.entries(availableFormats).map(([key, format]) => (
-                <button
-                  key={key}
-                  className={`${styles.formatChip} ${selectedFormats.includes(key) ? styles.formatChipActive : ""}`}
-                  onClick={() => toggleFormat(key)}
-                  disabled={isRunning}
-                  title={format.description}
-                >
-                  <span className={styles.formatIcon}>
-                    {FORMAT_ICONS[key] || "📄"}
-                  </span>
-                  <span>{format.name}</span>
-                </button>
-              ))}
+              {Object.entries(availableFormats).map(([key, format]) => {
+                const IconComponent = FORMAT_ICONS[key] || FileCode;
+                return (
+                  <button
+                    key={key}
+                    className={`${styles.formatChip} ${selectedFormats.includes(key) ? styles.formatChipActive : ""}`}
+                    onClick={() => toggleFormat(key)}
+                    disabled={isRunning}
+                    title={format.description}
+                  >
+                    <span className={styles.formatIcon}>
+                      <IconComponent size={20} weight="duotone" />
+                    </span>
+                    <span>{format.name}</span>
+                  </button>
+                );
+              })}
             </div>
           </div>
 
@@ -285,7 +303,11 @@ export default function GeneratePage() {
                 <span className="spinner" /> Generating...
               </>
             ) : (
-              `🧠 Generate in ${selectedFormats.length} format${selectedFormats.length > 1 ? "s" : ""}`
+              <>
+                <Brain size={20} weight="duotone" /> Generate in{" "}
+                {selectedFormats.length} format
+                {selectedFormats.length > 1 ? "s" : ""}
+              </>
             )}
           </button>
         </div>
@@ -313,27 +335,30 @@ export default function GeneratePage() {
 
             {/* Tabs */}
             <div className={styles.tabs}>
-              {outputTabs.map((fmt) => (
-                <button
-                  key={fmt}
-                  className={`${styles.tab} ${activeTab === fmt ? styles.tabActive : ""}`}
-                  onClick={() => setActiveTab(fmt)}
-                >
-                  {FORMAT_ICONS[fmt] || "📄"}{" "}
-                  {availableFormats[fmt]?.name || fmt}
-                </button>
-              ))}
+              {outputTabs.map((fmt) => {
+                const IconComponent = FORMAT_ICONS[fmt] || FileCode;
+                return (
+                  <button
+                    key={fmt}
+                    className={`${styles.tab} ${activeTab === fmt ? styles.tabActive : ""}`}
+                    onClick={() => setActiveTab(fmt)}
+                  >
+                    <IconComponent size={18} weight="duotone" />{" "}
+                    {availableFormats[fmt]?.name || fmt}
+                  </button>
+                );
+              })}
               <button
                 className={`${styles.tab} ${activeTab === "coverage" ? styles.tabActive : ""}`}
                 onClick={() => setActiveTab("coverage")}
               >
-                📊 Coverage
+                <ChartBar size={18} weight="duotone" /> Coverage
               </button>
               <button
                 className={`${styles.tab} ${activeTab === "plan" ? styles.tabActive : ""}`}
                 onClick={() => setActiveTab("plan")}
               >
-                🧠 Plan
+                <Brain size={18} weight="duotone" /> Plan
               </button>
             </div>
 
@@ -400,7 +425,8 @@ export default function GeneratePage() {
             {/* Context Info */}
             {result.parsed_with_llm && (
               <div className={styles.llmBadge}>
-                🤖 Requirements were parsed using AI (natural language detected)
+                <Robot size={18} weight="duotone" /> Requirements were parsed
+                using AI (natural language detected)
               </div>
             )}
           </div>

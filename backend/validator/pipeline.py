@@ -96,6 +96,7 @@ def validate_plan(
             description=scenario.description,
             test_type=scenario.test_type,
             expected_status=scenario.expected_status,
+            payload_hint=scenario.payload_hint,  # Preserve original hint for generator compatibility
             payload=repaired_payload,
             preconditions=[],
             variable_refs={},

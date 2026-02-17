@@ -1,5 +1,6 @@
 "use client";
 
+import { Scan, Tag, Cube, CheckSquare, Gavel } from "@phosphor-icons/react";
 import { CodeContext } from "@/lib/api";
 import styles from "./CodeContextDisplay.module.css";
 
@@ -23,7 +24,9 @@ export default function CodeContextDisplay({
   return (
     <div className={styles.container}>
       <div className={styles.header}>
-        <h3 className={styles.title}>🔍 Code Analysis Results</h3>
+        <h3 className={styles.title}>
+          <Scan size={20} weight="duotone" /> Code Analysis Results
+        </h3>
         <p className={styles.subtitle}>
           Extracted metadata from your source files
         </p>
@@ -34,7 +37,9 @@ export default function CodeContextDisplay({
         {codeContext.enums.length > 0 && (
           <div className={styles.section}>
             <div className={styles.sectionHeader}>
-              <span className={styles.sectionIcon}>🏷️</span>
+              <span className={styles.sectionIcon}>
+                <Tag size={18} weight="duotone" />
+              </span>
               <h4 className={styles.sectionTitle}>
                 Enums ({codeContext.enums.length})
               </h4>
@@ -70,7 +75,9 @@ export default function CodeContextDisplay({
         {codeContext.models.length > 0 && (
           <div className={styles.section}>
             <div className={styles.sectionHeader}>
-              <span className={styles.sectionIcon}>📦</span>
+              <span className={styles.sectionIcon}>
+                <Cube size={18} weight="duotone" />
+              </span>
               <h4 className={styles.sectionTitle}>
                 Models ({codeContext.models.length})
               </h4>
@@ -104,7 +111,9 @@ export default function CodeContextDisplay({
         {codeContext.validators.length > 0 && (
           <div className={styles.section}>
             <div className={styles.sectionHeader}>
-              <span className={styles.sectionIcon}>✅</span>
+              <span className={styles.sectionIcon}>
+                <CheckSquare size={18} weight="duotone" />
+              </span>
               <h4 className={styles.sectionTitle}>
                 Validators ({codeContext.validators.length})
               </h4>
@@ -138,7 +147,9 @@ export default function CodeContextDisplay({
         {codeContext.business_rules.length > 0 && (
           <div className={styles.section}>
             <div className={styles.sectionHeader}>
-              <span className={styles.sectionIcon}>⚖️</span>
+              <span className={styles.sectionIcon}>
+                <Gavel size={18} weight="duotone" />
+              </span>
               <h4 className={styles.sectionTitle}>
                 Business Rules ({codeContext.business_rules.length})
               </h4>

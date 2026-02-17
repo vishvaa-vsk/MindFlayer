@@ -119,6 +119,7 @@ class ValidatedScenario(BaseModel):
     description: str
     test_type: str
     expected_status: int = 200
+    payload_hint: dict | None = None   # Original hint from planning phase (preserved for generator compatibility)
     payload: dict | None = None        # Type-enforced payload (not just hints)
     preconditions: list[Precondition] = []
     variable_refs: dict[str, str] = {} # placeholder → variable_name mapping
