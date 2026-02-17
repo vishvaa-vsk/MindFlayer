@@ -65,7 +65,10 @@ class AzureAdapter(ModelAdapter):
                 temperature=temperature,
                 max_tokens=max_tokens,
             )
-            return response.choices[0].message.content.strip()
+            content = response.choices[0].message.content
+            if content is None:
+                content = getattr(response.choices[0].message, 'reasoning_content', None) or ""
+            return content.strip()
         except Exception as e:
             if "DeploymentNotFound" in str(e):
                 raise ProviderUnavailableError(

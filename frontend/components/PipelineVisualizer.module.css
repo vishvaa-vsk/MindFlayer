@@ -1,149 +1,274 @@
 .pipeline {
-    padding: 20px 0;
-    animation: fadeIn 0.3s ease-out;
+  padding: 20px 0;
+  animation: fadeIn 0.3s ease-out;
 }
 
 .stages {
-    display: flex;
-    align-items: flex-start;
-    gap: 0;
+  display: flex;
+  align-items: flex-start;
+  gap: 0;
 }
 
 .stageWrapper {
-    display: flex;
-    align-items: flex-start;
-    flex: 1;
+  display: flex;
+  align-items: flex-start;
+  flex: 1;
 }
 
 .connector {
-    width: 40px;
-    height: 2px;
-    background: var(--border-default);
-    margin-top: 22px;
-    flex-shrink: 0;
-    transition: background var(--transition-base);
+  width: 40px;
+  height: 2px;
+  background: var(--border-default);
+  margin-top: 22px;
+  flex-shrink: 0;
+  transition: background var(--transition-base);
 }
 
 .connectorActive {
-    background: var(--accent-primary);
-    box-shadow: 0 0 8px rgba(59, 130, 246, 0.3);
+  background: linear-gradient(
+    90deg,
+    var(--accent-primary) 0%,
+    rgba(59, 130, 246, 0.8) 100%
+  );
+  box-shadow: 0 0 8px rgba(59, 130, 246, 0.4);
+  animation: flowLine 1.5s ease-in-out infinite;
 }
 
 .stage {
-    display: flex;
-    align-items: flex-start;
-    gap: 12px;
-    padding: 12px 16px;
-    border-radius: var(--radius-md);
-    border: 1px solid var(--border-subtle);
-    background: var(--bg-surface);
-    transition: all var(--transition-base);
-    min-width: 140px;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 16px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-subtle);
+  background: var(--bg-surface);
+  transition: all var(--transition-base);
+  min-width: 140px;
 }
 
 .stage.pending {
-    opacity: 0.4;
+  opacity: 0.4;
 }
 
 .stage.active {
-    border-color: var(--accent-primary);
-    background: rgba(59, 130, 246, 0.08);
-    box-shadow: 0 0 20px rgba(59, 130, 246, 0.1);
-    animation: glow 2s infinite;
+  border-color: var(--accent-primary);
+  background: rgba(59, 130, 246, 0.08);
+  box-shadow:
+    0 0 20px rgba(59, 130, 246, 0.2),
+    0 0 40px rgba(59, 130, 246, 0.1);
+  animation: glow 2s ease-in-out infinite;
+  transform: scale(1.02);
 }
 
 .stage.done {
-    border-color: var(--accent-success);
-    background: rgba(16, 185, 129, 0.06);
+  border-color: var(--accent-success);
+  background: rgba(16, 185, 129, 0.06);
 }
 
 .stageIcon {
-    width: 36px;
-    height: 36px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: var(--radius-sm);
-    font-size: 1.1rem;
-    flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+  font-size: 1.1rem;
+  flex-shrink: 0;
+  position: relative;
+  transition: transform 0.3s ease;
+}
+
+.activeIcon {
+  animation: iconBounce 2s ease-in-out infinite;
+}
+
+.pendingIcon {
+  opacity: 0.5;
 }
 
 .spinner {
-    width: 20px;
-    height: 20px;
-    border: 2.5px solid rgba(59, 130, 246, 0.2);
-    border-top-color: var(--accent-primary);
-    border-radius: 50%;
-    animation: spin 0.7s linear infinite;
+  width: 24px;
+  height: 24px;
+  border: 3px solid rgba(59, 130, 246, 0.15);
+  border-top-color: var(--accent-primary);
+  border-right-color: var(--accent-primary);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  position: relative;
+  z-index: 2;
+}
+
+.spinnerGlow {
+  position: absolute;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    rgba(59, 130, 246, 0.3) 0%,
+    transparent 70%
+  );
+  animation: pulse 1.5s ease-in-out infinite;
+  z-index: 1;
 }
 
 .checkmark {
-    color: var(--accent-success);
-    font-size: 1.1rem;
-    font-weight: 700;
+  color: var(--accent-success);
+  font-size: 1.1rem;
+  font-weight: 700;
+  animation: checkPop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
 .stageInfo {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-    min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
 }
 
 .stageLabel {
-    font-size: 0.85rem;
-    font-weight: 700;
-    color: var(--text-primary);
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--text-primary);
 }
 
 .stageMsg {
-    font-size: 0.75rem;
-    color: var(--text-secondary);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .completeMsg {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-top: 16px;
-    padding: 10px 16px;
-    background: rgba(16, 185, 129, 0.08);
-    border: 1px solid rgba(16, 185, 129, 0.2);
-    border-radius: var(--radius-md);
-    font-size: 0.85rem;
-    font-weight: 600;
-    color: var(--accent-success);
-    animation: fadeIn 0.3s ease-out;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 16px;
+  padding: 10px 16px;
+  background: rgba(16, 185, 129, 0.08);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  border-radius: var(--radius-md);
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--accent-success);
+  animation: fadeIn 0.3s ease-out;
 }
 
 .errorMsg {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-top: 16px;
-    padding: 10px 16px;
-    background: rgba(239, 68, 68, 0.08);
-    border: 1px solid rgba(239, 68, 68, 0.2);
-    border-radius: var(--radius-md);
-    font-size: 0.85rem;
-    font-weight: 600;
-    color: var(--accent-error);
-    animation: fadeIn 0.3s ease-out;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 16px;
+  padding: 10px 16px;
+  background: rgba(239, 68, 68, 0.08);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  border-radius: var(--radius-md);
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--accent-error);
+  animation: fadeIn 0.3s ease-out;
+}
+
+/* Keyframe Animations */
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes glow {
+  0%,
+  100% {
+    box-shadow:
+      0 0 20px rgba(59, 130, 246, 0.2),
+      0 0 40px rgba(59, 130, 246, 0.1);
+  }
+  50% {
+    box-shadow:
+      0 0 30px rgba(59, 130, 246, 0.4),
+      0 0 60px rgba(59, 130, 246, 0.2);
+  }
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.5;
+  }
+  50% {
+    transform: scale(1.2);
+    opacity: 0.8;
+  }
+}
+
+@keyframes iconBounce {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-3px);
+  }
+}
+
+@keyframes checkPop {
+  0% {
+    transform: scale(0.5);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes flowLine {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
 }
 
 @media (max-width: 768px) {
-    .stages {
-        flex-direction: column;
-        gap: 8px;
-    }
+  .stages {
+    flex-direction: column;
+    gap: 8px;
+  }
 
-    .connector {
-        width: 2px;
-        height: 20px;
-        margin-top: 0;
-        margin-left: 22px;
-    }
+  .connector {
+    width: 2px;
+    height: 20px;
+    margin-top: 0;
+    margin-left: 22px;
+  }
+
+  .connectorActive {
+    background: linear-gradient(
+      180deg,
+      var(--accent-primary) 0%,
+      rgba(59, 130, 246, 0.8) 100%
+    );
+  }
 }

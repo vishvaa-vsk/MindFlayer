@@ -1,0 +1,4 @@
+POST /payments (requires merchant_auth)
+POST /payments/:id/capture (requires merchant_auth, depends on POST /payments)
+POST /payments/:id/refund (requires merchant_auth, depends on POST /payments/:id/capture)
+GET /payments/:id (requires merchant_auth)
