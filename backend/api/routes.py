@@ -77,6 +77,8 @@ class GenerateTestsRequest(BaseModel):
     requirements_text: str
     existing_test_names: list[str] = []
     output_formats: list[str] = ["pytest"]
+    code_files: dict[str, str] | None = None  # filename -> file_content
+    code_language: str = "python"  # Programming language of code files
 
 
 class GenerateTestsResponse(BaseModel):
@@ -134,7 +136,11 @@ async def generate_tests(request: GenerateTestsRequest):
     """
     try:
         used_llm = not is_structured_format(request.requirements_text)
-        context = parse_requirements_text(request.requirements_text)
+        context = parse_requirements_text(
+            request.requirements_text,
+            code_files=request.code_files,
+            language=request.code_language
+        )
         test_plan = plan_tests(context, existing_tests=request.existing_test_names)
 
         # ── Validation layer ──────────────────────────────
@@ -210,7 +216,11 @@ async def generate_tests_stream(request: GenerateTestsRequest):
             await asyncio.sleep(0.1)
 
             used_llm = not is_structured_format(request.requirements_text)
-            context = parse_requirements_text(request.requirements_text)
+            context = parse_requirements_text(
+                request.requirements_text,
+                code_files=request.code_files,
+                language=request.code_language
+            )
 
             yield _sse_event("context_ready", {
                 "stage": "parsing",

@@ -119,11 +119,70 @@ class AuthRule(BaseModel):
     required_for: list[str] = []  # List of endpoint names
 
 
+class EnumDefinition(BaseModel):
+    """Extracted enum from source code."""
+    name: str
+    values: list[str]
+    source_file: str | None = None
+    description: str = ""
+
+
+class ValidatorRule(BaseModel):
+    """Extracted validation rule from source code."""
+    field_name: str
+    rule_type: str  # e.g., "min_length", "max_length", "pattern", "custom"
+    constraint: str | int | float | None = None
+    error_message: str = ""
+    source_file: str | None = None
+
+
+class BusinessRule(BaseModel):
+    """Extracted business logic rule from source code."""
+    description: str
+    condition: str  # e.g., "status == 'shipped'"
+    action: str  # e.g., "raise error 'Cannot cancel'"
+    error_message: str = ""
+    applies_to: str | None = None  # endpoint or entity name
+    source_file: str | None = None
+
+
+class ModelDefinition(BaseModel):
+    """Extracted data model from source code (e.g., Pydantic, SQLAlchemy)."""
+    name: str
+    fields: dict[str, str]  # field_name -> field_type
+    validators: list[ValidatorRule] = []
+    source_file: str | None = None
+
+
+class CodeContext(BaseModel):
+    """Context extracted from actual source code files.
+    
+    This includes enums, validators, business rules, and model definitions
+    parsed from the user's codebase using AST analysis.
+    """
+    enums: list[EnumDefinition] = []
+    validators: list[ValidatorRule] = []
+    business_rules: list[BusinessRule] = []
+    models: list[ModelDefinition] = []
+    
+    def get_enum_values(self, enum_name: str) -> list[str] | None:
+        """Get values for a specific enum by name."""
+        for enum in self.enums:
+            if enum.name.lower() == enum_name.lower():
+                return enum.values
+        return None
+    
+    def get_validators_for_field(self, field_name: str) -> list[ValidatorRule]:
+        """Get all validators for a specific field."""
+        return [v for v in self.validators if v.field_name.lower() == field_name.lower()]
+
+
 class SystemContext(BaseModel):
     """Complete system context from API requirements."""
     endpoints: list[Endpoint] = []
     auth_rules: list[AuthRule] = []
     dependencies: dict[str, list[str]] = {}
+    code_context: CodeContext | None = None  # Optional: populated when code files analyzed
 
     @field_validator("endpoints")
     @classmethod
