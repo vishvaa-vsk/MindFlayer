@@ -14,6 +14,7 @@ from generator.junit_gen import generate_junit_xml
 from generator.gherkin_gen import generate_gherkin
 from generator.openapi_gen import generate_openapi_spec
 from validator.coverage import validate_coverage
+from validator.pipeline import validate_plan, validate_output
 from config import get_settings, update_settings
 from adapters.registry import list_available_providers
 from adapters.base import PrivacyViolationError, CircuitOpenError
@@ -126,15 +127,20 @@ async def generate_tests(request: GenerateTestsRequest):
     Pipeline:
     1. Parse requirements_text → SystemContext
     2. Plan tests → TestPlan
-    3. Generate code → outputs dict (per requested format)
-    4. Validate coverage → report
+    3. Validate plan (dependency graph, type enforcement, preconditions, ordering)
+    4. Generate code → outputs dict (per requested format)
+    5. Post-generation AST check + repair
+    6. Validate coverage → report
     """
     try:
         used_llm = not is_structured_format(request.requirements_text)
         context = parse_requirements_text(request.requirements_text)
         test_plan = plan_tests(context, existing_tests=request.existing_test_names)
 
-        # Generate all requested formats
+        # ── Validation layer ──────────────────────────────
+        validated_plan = validate_plan(test_plan, context)
+
+        # Generate all requested formats (generators auto-validate via pipeline)
         outputs = {}
         for fmt in request.output_formats:
             if fmt in FORMAT_GENERATORS:
@@ -146,6 +152,15 @@ async def generate_tests(request: GenerateTestsRequest):
 
         planned_test_names = [s.test_name for s in test_plan.scenarios]
         validation = validate_coverage(planned_test_names, request.existing_test_names)
+
+        # Merge validation report into response
+        validation["validation_report"] = {
+            "type_mismatches": len(validated_plan.report.type_mismatches),
+            "injected_preconditions": validated_plan.report.injected_preconditions,
+            "reordered_count": validated_plan.report.reordered_count,
+            "warnings": validated_plan.report.warnings,
+            "is_clean": validated_plan.report.is_clean,
+        }
 
         return GenerateTestsResponse(
             context=context,
@@ -214,6 +229,31 @@ async def generate_tests_stream(request: GenerateTestsRequest):
                 "stage": "planning",
                 "message": f"Planned {len(test_plan.scenarios)} test scenarios",
                 "data": test_plan.model_dump(),
+            })
+            await asyncio.sleep(0.1)
+
+            # Stage 2.5: Validation layer
+            yield _sse_event("stage", {"stage": "validating_plan", "message": "Running validation layer..."})
+            await asyncio.sleep(0.1)
+
+            validated_plan = validate_plan(test_plan, context)
+
+            yield _sse_event("validation_ready", {
+                "stage": "validating_plan",
+                "message": (
+                    f"Validated: {validated_plan.report.injected_preconditions} preconditions, "
+                    f"{len(validated_plan.report.type_mismatches)} type fixes, "
+                    f"{validated_plan.report.reordered_count} reordered"
+                ),
+                "data": {
+                    "type_mismatches": len(validated_plan.report.type_mismatches),
+                    "injected_preconditions": validated_plan.report.injected_preconditions,
+                    "reordered_count": validated_plan.report.reordered_count,
+                    "dependency_graph": {
+                        "resources": len(validated_plan.dependency_graph.resources),
+                        "edges": len(validated_plan.dependency_graph.edges),
+                    },
+                },
             })
             await asyncio.sleep(0.1)
 

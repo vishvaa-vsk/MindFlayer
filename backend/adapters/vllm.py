@@ -40,7 +40,10 @@ class VLLMAdapter(ModelAdapter):
                 temperature=temperature,
                 max_tokens=max_tokens,
             )
-            return response.choices[0].message.content.strip()
+            content = response.choices[0].message.content
+            if content is None:
+                content = getattr(response.choices[0].message, 'reasoning_content', None) or ""
+            return content.strip()
         except Exception as e:
             if "Connection" in str(e) or "connect" in str(e).lower():
                 settings = get_settings()

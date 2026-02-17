@@ -45,13 +45,13 @@ def parse_requirements_text(text: str) -> SystemContext:
         try:
             text = parse_prose_to_structured(text)
         except ValueError as e:
-            # If API key not set, try regex parsing anyway
-            if "API_KEY" in str(e).upper():
-                raise ValueError(
-                    f"Natural language parsing requires an API key. {str(e)}\n"
-                    f"Alternatively, use structured format: METHOD /path (requires auth)"
-                )
             raise
+        except Exception as e:
+            # LLM provider error — try keyword fallback built into parse_prose_to_structured
+            raise ValueError(
+                f"Failed to parse natural language requirements: {str(e)}\n"
+                f"Use structured format: METHOD /path (requires auth)"
+            )
 
     # Parse structured format (regex-based)
     endpoints = []
@@ -94,6 +94,22 @@ def parse_requirements_text(text: str) -> SystemContext:
             dep_name = f"{dep_method}_{dep_path}".lower().replace("/", "_").replace(":", "")
             endpoint_depends.append(dep_name)
 
+        # Deduplicate: if endpoint already exists, merge new info into it
+        existing = next((e for e in endpoints if e.name == endpoint_name), None)
+        if existing is not None:
+            # Merge: promote auth if either line requires it
+            if requires_auth and not existing.requires_auth:
+                existing.requires_auth = True
+            # Merge dependencies
+            for dep in endpoint_depends:
+                if dep not in existing.depends_on:
+                    existing.depends_on.append(dep)
+            # Merge into dependency map
+            for dep in endpoint_depends:
+                if dep not in dependencies.get(endpoint_name, []):
+                    dependencies.setdefault(endpoint_name, []).append(dep)
+            continue
+
         # Create Endpoint object
         endpoint = Endpoint(
             name=endpoint_name,
@@ -108,6 +124,15 @@ def parse_requirements_text(text: str) -> SystemContext:
     # Build auth rules
     auth_rules = [AuthRule(scope=scope, required_for=endpoints_list)
                   for scope, endpoints_list in auth_rules_dict.items()]
+
+    # ── Validate parsing produced results ─────────────────
+    if not endpoints:
+        raise ValueError(
+            "No API endpoints could be parsed from the requirements. "
+            "Please use structured format (e.g., 'POST /orders (requires user_auth)') "
+            "or provide clearer natural language requirements. "
+            "If using natural language, ensure your LLM provider is configured and responsive."
+        )
 
     # ── Schema Inference ─────────────────────────────────
     # Enrich endpoints with request/response schemas, state constraints, and roles
