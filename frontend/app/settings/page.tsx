@@ -1,15 +1,16 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { Globe, Horse, Lightning, Smiley, Cloud, Plug, LinkSimple, ShieldCheck, Robot, FloppyDisk, Lock, Warning, Check } from '@phosphor-icons/react';
 import styles from './settings.module.css';
 import { getSettings, updateSettings, healthCheck, getProviders, AppSettings, ProviderInfo } from '@/lib/api';
 
-const PROVIDER_META: Record<string, { label: string; icon: string; desc: string }> = {
-    openrouter: { label: 'OpenRouter', icon: '🌐', desc: 'Cloud gateway — 100+ models via single API key' },
-    ollama: { label: 'Ollama', icon: '🦙', desc: 'Local inference — fully air-gapped, privacy-safe' },
-    vllm: { label: 'vLLM', icon: '⚡', desc: 'High-throughput local serving — OpenAI-compatible' },
-    tgi: { label: 'HuggingFace TGI', icon: '🤗', desc: 'HuggingFace Text Generation Inference' },
-    azure: { label: 'Azure OpenAI', icon: '☁️', desc: 'Enterprise Azure-hosted GPT models' },
+const PROVIDER_META: Record<string, { label: string; icon: any; desc: string }> = {
+    openrouter: { label: 'OpenRouter', icon: Globe, desc: 'Cloud gateway — 100+ models via single API key' },
+    ollama: { label: 'Ollama', icon: Horse, desc: 'Local inference — fully air-gapped, privacy-safe' },
+    vllm: { label: 'vLLM', icon: Lightning, desc: 'High-throughput local serving — OpenAI-compatible' },
+    tgi: { label: 'HuggingFace TGI', icon: Smiley, desc: 'HuggingFace Text Generation Inference' },
+    azure: { label: 'Azure OpenAI', icon: Cloud, desc: 'Enterprise Azure-hosted GPT models' },
 };
 
 export default function SettingsPage() {
@@ -118,7 +119,7 @@ export default function SettingsPage() {
 
                 {/* Backend Status */}
                 <div className={`glass-card ${styles.card}`}>
-                    <h2 className={styles.cardTitle}>🔌 Backend Status</h2>
+                    <h2 className={styles.cardTitle}><Plug size={24} weight="duotone" /> Backend Status</h2>
                     <div className={styles.statusRow}>
                         <div className={`${styles.statusDot} ${styles[backendStatus]}`} />
                         <span>
@@ -131,7 +132,7 @@ export default function SettingsPage() {
                         <div className={styles.statusInfo}>
                             <span className="badge badge-blue">{settings.app_name} v{settings.app_version}</span>
                             <span className={`badge ${settings.has_api_key ? 'badge-green' : 'badge-red'}`}>
-                                API Key: {settings.has_api_key ? 'Configured ✓' : 'Not Set ✗'}
+                                API Key: {settings.has_api_key ? 'Configured' : 'Not Set'}
                             </span>
                             <span className="badge badge-purple">
                                 Provider: {PROVIDER_META[settings.llm_provider]?.label || settings.llm_provider}
@@ -142,7 +143,7 @@ export default function SettingsPage() {
 
                 {/* LLM Provider Selector */}
                 <div className={`glass-card ${styles.card}`}>
-                    <h2 className={styles.cardTitle}>🔗 LLM Provider</h2>
+                    <h2 className={styles.cardTitle}><LinkSimple size={24} weight="duotone" /> LLM Provider</h2>
                     <p className={styles.cardDesc}>
                         Choose your LLM backend. Local providers (Ollama, vLLM, TGI) keep all data on-premise.
                     </p>
@@ -160,17 +161,17 @@ export default function SettingsPage() {
                                     disabled={!!isBlocked}
                                 >
                                     <div className={styles.providerHeader}>
-                                        <span className={styles.providerIcon}>{meta.icon}</span>
+                                        <span className={styles.providerIcon}>{<meta.icon size={24} weight="duotone" />}</span>
                                         <span className={styles.providerName}>{meta.label}</span>
                                         {status && (
                                             <span className={`${styles.providerStatus} ${status.available ? styles.providerOnline : styles.providerOffline}`}>
-                                                {isBlocked ? '🔒' : status.available ? '●' : '○'}
+                                                {isBlocked ? <Lock size={14} weight="duotone" /> : status.available ? '●' : '○'}
                                             </span>
                                         )}
                                     </div>
                                     <p className={styles.providerDesc}>{meta.desc}</p>
                                     {status?.is_local && (
-                                        <span className={styles.localBadge}>🔒 Local</span>
+                                        <span className={styles.localBadge}><Lock size={12} weight="duotone" /> Local</span>
                                     )}
                                 </button>
                             );
@@ -180,7 +181,7 @@ export default function SettingsPage() {
 
                 {/* Data Privacy */}
                 <div className={`glass-card ${styles.card}`}>
-                    <h2 className={styles.cardTitle}>🛡️ Data Privacy</h2>
+                    <h2 className={styles.cardTitle}><ShieldCheck size={24} weight="duotone" /> Data Privacy</h2>
                     <div className={styles.toggleRow}>
                         <div>
                             <label className={styles.fieldLabel}>Local-Only Mode</label>
@@ -197,7 +198,7 @@ export default function SettingsPage() {
                     </div>
                     {!allowExternal && (
                         <div className={styles.privacyWarning}>
-                            ⚠️ Local-only mode is active. Cloud providers (OpenRouter, Azure) are blocked. Use Ollama, vLLM, or TGI.
+                            <Warning size={18} weight="duotone" /> Local-only mode is active. Cloud providers (OpenRouter, Azure) are blocked. Use Ollama, vLLM, or TGI.
                         </div>
                     )}
                 </div>
@@ -205,7 +206,7 @@ export default function SettingsPage() {
                 {/* Provider-Specific Config: OpenRouter */}
                 {provider === 'openrouter' && (
                     <div className={`glass-card ${styles.card}`}>
-                        <h2 className={styles.cardTitle}>🌐 OpenRouter Configuration</h2>
+                        <h2 className={styles.cardTitle}><Globe size={24} weight="duotone" /> OpenRouter Configuration</h2>
                         <p className={styles.cardDesc}>
                             Get your API key from{' '}
                             <a href="https://openrouter.ai/keys" target="_blank" rel="noopener noreferrer">
@@ -225,7 +226,7 @@ export default function SettingsPage() {
                 {/* Provider-Specific Config: Azure */}
                 {provider === 'azure' && (
                     <div className={`glass-card ${styles.card}`}>
-                        <h2 className={styles.cardTitle}>☁️ Azure OpenAI Configuration</h2>
+                        <h2 className={styles.cardTitle}><Cloud size={24} weight="duotone" /> Azure OpenAI Configuration</h2>
                         <div className={styles.fieldGroup}>
                             <label className={styles.fieldLabel}>Azure Endpoint</label>
                             <input
@@ -268,7 +269,7 @@ export default function SettingsPage() {
 
                 {/* Models */}
                 <div className={`glass-card ${styles.card}`}>
-                    <h2 className={styles.cardTitle}>🤖 AI Models</h2>
+                    <h2 className={styles.cardTitle}><Robot size={24} weight="duotone" /> AI Models</h2>
 
                     <div className={styles.fieldGroup}>
                         <label className={styles.fieldLabel}>Parsing Model</label>
@@ -345,14 +346,14 @@ export default function SettingsPage() {
                 {/* Save */}
                 <div className={styles.actions}>
                     {error && <div className={styles.error}>{error}</div>}
-                    {saved && <div className={styles.success}>✓ Settings saved successfully!</div>}
+                    {saved && <div className={styles.success}><Check size={16} weight="bold" /> Settings saved successfully!</div>}
                     <button
                         className="btn btn-primary btn-lg"
                         onClick={handleSave}
                         disabled={saving}
                         style={{ width: '100%' }}
                     >
-                        {saving ? 'Saving...' : '💾 Save Settings'}
+                        {saving ? 'Saving...' : <><FloppyDisk size={20} weight="duotone" /> Save Settings</>}
                     </button>
                 </div>
             </div>

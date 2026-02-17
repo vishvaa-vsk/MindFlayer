@@ -33,6 +33,15 @@
   font-size: 1.1rem;
   font-weight: 700;
   margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--text-primary);
+}
+
+.cardTitle svg {
+  color: var(--accent-primary);
+  flex-shrink: 0;
 }
 
 .cardDesc {
@@ -166,6 +175,9 @@
   font-size: 0.85rem;
   font-weight: 600;
   margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 
 /* ── Provider Grid ────────────────────────────────────── */
@@ -216,7 +228,15 @@
 }
 
 .providerIcon {
-  font-size: 1.4rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--accent-primary);
+}
+
+.providerIcon svg {
+  width: 24px;
+  height: 24px;
 }
 
 .providerName {
@@ -246,7 +266,9 @@
 }
 
 .localBadge {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
   padding: 3px 8px;
   background: rgba(16, 185, 129, 0.15);
   color: var(--accent-success);
@@ -308,6 +330,13 @@
   border-radius: var(--radius-md);
   color: var(--accent-warning);
   font-size: 0.85rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.privacyWarning svg {
+  flex-shrink: 0;
 }
 
 /* ── Input with Chips ───────────────────────────────── */

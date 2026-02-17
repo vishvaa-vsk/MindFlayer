@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { Copy, Check, DownloadSimple } from '@phosphor-icons/react';
 import styles from './TestOutput.module.css';
 
 interface TestOutputProps {
@@ -68,10 +69,10 @@ export default function TestOutput({ code, testCount, language = 'python', filen
                 </div>
                 <div style={{ display: 'flex', gap: '6px' }}>
                     <button className={styles.copyBtn} onClick={handleDownload}>
-                        ⬇ Download
+                        <DownloadSimple size={16} weight="duotone" /> Download
                     </button>
                     <button className={styles.copyBtn} onClick={handleCopy}>
-                        {copied ? '✓ Copied!' : '📋 Copy'}
+                        {copied ? <><Check size={16} weight="duotone" /> Copied!</> : <><Copy size={16} weight="duotone" /> Copy</>}
                     </button>
                 </div>
             </div>

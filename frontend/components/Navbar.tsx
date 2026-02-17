@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { Brain } from '@phosphor-icons/react';
 import styles from './Navbar.module.css';
 
 export default function Navbar() {
@@ -19,7 +20,7 @@ export default function Navbar() {
         <nav className={`${styles.nav} ${scrolled ? styles.scrolled : ''}`}>
             <div className={styles.inner}>
                 <Link href="/" className={styles.logo}>
-                    <span className={styles.logoIcon}>🧠</span>
+                    <Brain className={styles.logoIcon} weight="duotone" />
                     <span className={styles.logoText}>MindFlayer</span>
                 </Link>
 
@@ -45,7 +46,7 @@ export default function Navbar() {
                 </div>
 
                 <Link href="/generate" className={`btn btn-primary ${styles.cta}`}>
-                    Generate Tests →
+                    Generate Tests <span className={styles.ctaArrow}>→</span>
                 </Link>
             </div>
         </nav>

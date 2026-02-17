@@ -34,7 +34,9 @@
 }
 
 .logoIcon {
-    font-size: 1.5rem;
+    width: 28px;
+    height: 28px;
+    color: var(--accent-primary);
 }
 
 .logoText {
@@ -74,6 +76,16 @@
 .cta {
     font-size: 0.85rem;
     padding: 8px 20px;
+}
+
+.ctaArrow {
+    display: inline-block;
+    transition: transform var(--transition-fast), color var(--transition-fast);
+}
+
+.cta:hover .ctaArrow {
+    transform: translateX(3px);
+    color: #fbbf24;
 }
 
 @media (max-width: 768px) {

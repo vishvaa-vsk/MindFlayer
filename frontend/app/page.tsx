@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { FileText, Brain, Lightning, CheckCircle, Link as LinkIcon, Broadcast, Target, ChartBar, ShieldCheck, PuzzlePiece } from '@phosphor-icons/react';
 import styles from './page.module.css';
 
 export default function Home() {
@@ -40,14 +41,16 @@ export default function Home() {
         <p className={styles.sectionDesc}>Four intelligent stages, one seamless pipeline</p>
         <div className={styles.steps}>
           {[
-            { icon: '📝', title: 'Parse', desc: 'Feed in requirements — prose or structured. AI extracts endpoints, auth rules, and dependencies.', color: '#3b82f6' },
-            { icon: '🧠', title: 'Plan', desc: 'Smart planner generates test scenarios: positive paths, auth failures, dependency checks, edge cases.', color: '#8b5cf6' },
-            { icon: '⚡', title: 'Generate', desc: 'DeepSeek V3 writes realistic, runnable pytest code with intelligent payloads and assertions.', color: '#06b6d4' },
-            { icon: '✅', title: 'Validate', desc: 'Coverage analyzer identifies gaps, deduplicates tests, and reports improvement metrics.', color: '#10b981' },
-          ].map((step, i) => (
+            { icon: FileText, title: 'Parse', desc: 'Feed in requirements — prose or structured. AI extracts endpoints, auth rules, and dependencies.', color: '#3b82f6' },
+            { icon: Brain, title: 'Plan', desc: 'Smart planner generates test scenarios: positive paths, auth failures, dependency checks, edge cases.', color: '#8b5cf6' },
+            { icon: Lightning, title: 'Generate', desc: 'DeepSeek V3 writes realistic, runnable pytest code with intelligent payloads and assertions.', color: '#06b6d4' },
+            { icon: CheckCircle, title: 'Validate', desc: 'Coverage analyzer identifies gaps, deduplicates tests, and reports improvement metrics.', color: '#10b981' },
+          ].map((step, i) => {
+            const IconComponent = step.icon;
+            return (
             <div key={i} className={styles.step} style={{ animationDelay: `${i * 100}ms` }}>
               <div className={styles.stepIcon} style={{ background: `${step.color}15`, color: step.color }}>
-                {step.icon}
+                <IconComponent size={32} weight="duotone" />
               </div>
               <div className={styles.stepConnector}>
                 <div className={styles.stepLine} style={{ background: step.color }} />
@@ -55,7 +58,7 @@ export default function Home() {
               <h3 className={styles.stepTitle}>{step.title}</h3>
               <p className={styles.stepDesc}>{step.desc}</p>
             </div>
-          ))}
+          );})}
         </div>
       </section>
 
@@ -64,19 +67,21 @@ export default function Home() {
         <h2 className={styles.sectionTitle}>Built for Developers</h2>
         <div className={styles.featureGrid}>
           {[
-            { icon: '🔗', title: 'OpenRouter Integration', desc: 'Access top AI models through OpenRouter — DeepSeek, Gemini, and more.' },
-            { icon: '📡', title: 'Real-Time Streaming', desc: 'Watch tests generate in real-time with Server-Sent Events pipeline visualization.' },
-            { icon: '🎯', title: 'Smart Test Planning', desc: 'Automatic positive, negative, auth, dependency, and edge case test detection.' },
-            { icon: '📊', title: 'Coverage Analysis', desc: 'Gap detection and deduplication against your existing test suite.' },
-            { icon: '🔐', title: 'Auth-Aware', desc: 'Understands authentication scopes and generates proper auth/no-auth test pairs.' },
-            { icon: '🧩', title: 'Dependency Mapping', desc: 'Detects endpoint dependencies and creates failure scenario tests.' },
-          ].map((feat, i) => (
+            { icon: LinkIcon, title: 'OpenRouter Integration', desc: 'Access top AI models through OpenRouter — DeepSeek, Gemini, and more.' },
+            { icon: Broadcast, title: 'Real-Time Streaming', desc: 'Watch tests generate in real-time with Server-Sent Events pipeline visualization.' },
+            { icon: Target, title: 'Smart Test Planning', desc: 'Automatic positive, negative, auth, dependency, and edge case test detection.' },
+            { icon: ChartBar, title: 'Coverage Analysis', desc: 'Gap detection and deduplication against your existing test suite.' },
+            { icon: ShieldCheck, title: 'Auth-Aware', desc: 'Understands authentication scopes and generates proper auth/no-auth test pairs.' },
+            { icon: PuzzlePiece, title: 'Dependency Mapping', desc: 'Detects endpoint dependencies and creates failure scenario tests.' },
+          ].map((feat, i) => {
+            const IconComponent = feat.icon;
+            return (
             <div key={i} className={`glass-card ${styles.featureCard}`} style={{ animationDelay: `${i * 80}ms` }}>
-              <div className={styles.featureIcon}>{feat.icon}</div>
+              <div className={styles.featureIcon}><IconComponent size={32} weight="duotone" /></div>
               <h3 className={styles.featureTitle}>{feat.title}</h3>
               <p className={styles.featureDesc}>{feat.desc}</p>
             </div>
-          ))}
+          );})}
         </div>
       </section>
 

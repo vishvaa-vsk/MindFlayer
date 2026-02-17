@@ -11,6 +11,13 @@
     font-size: 1.1rem;
     font-weight: 700;
     margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.title svg {
+    color: var(--accent-primary);
 }
 
 .stats {

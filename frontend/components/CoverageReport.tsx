@@ -1,5 +1,6 @@
 'use client';
 
+import { ChartBar } from '@phosphor-icons/react';
 import { ValidationReport } from '@/lib/api';
 import styles from './CoverageReport.module.css';
 
@@ -13,7 +14,7 @@ export default function CoverageReport({ validation }: CoverageReportProps) {
 
     return (
         <div className={styles.container}>
-            <h3 className={styles.title}>📊 Coverage Report</h3>
+            <h3 className={styles.title}><ChartBar size={24} weight="duotone" /> Coverage Report</h3>
 
             {/* Stats Cards */}
             <div className={styles.stats}>

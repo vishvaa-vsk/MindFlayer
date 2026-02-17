@@ -1,5 +1,6 @@
 'use client';
 
+import { FileText, Brain, Lightning, CheckCircle, Check } from '@phosphor-icons/react';
 import { PipelineStage } from '@/lib/api';
 import styles from './PipelineVisualizer.module.css';
 
@@ -8,11 +9,11 @@ interface PipelineVisualizerProps {
     stageMessages: Record<string, string>;
 }
 
-const STAGES: { key: PipelineStage; label: string; icon: string }[] = [
-    { key: 'parsing', label: 'Parse', icon: '📝' },
-    { key: 'planning', label: 'Plan', icon: '🧠' },
-    { key: 'generating', label: 'Generate', icon: '⚡' },
-    { key: 'validating', label: 'Validate', icon: '✅' },
+const STAGES: { key: PipelineStage; label: string; icon: any }[] = [
+    { key: 'parsing', label: 'Parse', icon: FileText },
+    { key: 'planning', label: 'Plan', icon: Brain },
+    { key: 'generating', label: 'Generate', icon: Lightning },
+    { key: 'validating', label: 'Validate', icon: CheckCircle },
 ];
 
 export default function PipelineVisualizer({ currentStage, stageMessages }: PipelineVisualizerProps) {
@@ -46,9 +47,9 @@ export default function PipelineVisualizer({ currentStage, stageMessages }: Pipe
                                     {status === 'active' ? (
                                         <div className={styles.spinner} />
                                     ) : status === 'done' ? (
-                                        <span className={styles.checkmark}>✓</span>
+                                        <span className={styles.checkmark}><Check size={16} weight="bold" /></span>
                                     ) : (
-                                        <span>{stage.icon}</span>
+                                        <span><stage.icon size={20} weight="duotone" /></span>
                                     )}
                                 </div>
                                 <div className={styles.stageInfo}>
