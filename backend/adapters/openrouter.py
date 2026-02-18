@@ -34,7 +34,7 @@ class OpenRouterAdapter(ModelAdapter):
         return OpenAI(
             base_url=settings.openrouter_base_url,
             api_key=settings.openrouter_api_key,
-            timeout=30.0,  # 30 second timeout for API calls
+            timeout=20.0,  # 20 second timeout for API calls
         )
 
     def _do_chat(self, messages: list[dict], model: str, temperature: float, max_tokens: int) -> str:
@@ -45,7 +45,17 @@ class OpenRouterAdapter(ModelAdapter):
             temperature=temperature,
             max_tokens=max_tokens,
         )
-        return response.choices[0].message.content.strip()
+        content = response.choices[0].message.content
+        if content is None:
+            # Some models put output in reasoning_content or return None
+            content = getattr(response.choices[0].message, 'reasoning_content', None) or ""
+        content = content.strip()
+        if not content:
+            raise ProviderUnavailableError(
+                f"Model '{model}' returned empty content. "
+                "The model may be overloaded or incompatible with this prompt."
+            )
+        return content
 
     def is_available(self) -> bool:
         settings = get_settings()
