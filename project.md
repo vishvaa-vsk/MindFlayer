@@ -2,7 +2,7 @@
 
 ## 🎯 Executive Summary
 
-**MindFlayer** is an AI-powered test generation platform that transforms API requirements into complete, executable test suites. Built for **AlgoQuest 2025** and **Imagine Cup 2026**, MindFlayer solves the critical problem of manual test writing by automating test planning, generation, and validation using intelligent AI models and systematic analysis.
+**MindFlayer** is an AI-powered test generation platform that transforms API requirements into complete, executable test suites. Built for **AlgoQuest 2025**, MindFlayer solves the critical problem of manual test writing by automating test planning, generation, and validation using intelligent AI models and systematic analysis.
 
 **Key Innovation**: MindFlayer doesn't just generate tests—it *understands* your API through intelligent parsing, *plans* comprehensive test scenarios, and *validates* coverage gaps, producing production-ready test code in seconds.
 
@@ -818,23 +818,6 @@ npm start
 
 ---
 
-### **Imagine Cup 2026** (Social Impact)
-
-**Focus**: Democratizing software quality.
-
-**Impact**:
-- **10x Productivity**: Generate 50+ tests in <10 seconds (vs. 5-10 tests/hour manually)
-- **Accessibility**: Free tier LLMs (DeepSeek, Gemini) enable global access
-- **Education**: Teaches developers what comprehensive testing looks like
-- **Quality**: Reduces production bugs by ensuring edge cases are tested
-
-**Talking Points**:
-- "Manual test writing is a barrier for solo developers and small teams"
-- "MindFlayer democratizes enterprise-grade testing practices"
-- "Free tier models mean any developer in the world can use it"
-- "Automatically generates tests beginners wouldn't think to write"
-
----
 
 ## 🔬 Technical Innovations
 
@@ -1036,6 +1019,6 @@ MIT License - See LICENSE file for details.
 
 ---
 
-**Built with ❤️ for AlgoQuest 2025 and Imagine Cup 2026**
+**Built with ❤️ for AlgoQuest 2025**
 
 **Stop writing tests. Start generating them. 🧠⚡**
